@@ -6,16 +6,23 @@ import { createLogger } from "./logger";
 const logger = createLogger("AuditLogCleanup");
 
 /**
- * P2: 監査ログ保持期間（デフォルト90日）
+ * P2: 監査ログ保持期間（デフォルト180日）
  * 環境変数 AUDIT_LOG_RETENTION_DAYS で変更可能
+ * 0を設定すると無制限（削除しない）
  */
-const AUDIT_LOG_RETENTION_DAYS = parseInt(process.env.AUDIT_LOG_RETENTION_DAYS || "90", 10);
+const AUDIT_LOG_RETENTION_DAYS = parseInt(process.env.AUDIT_LOG_RETENTION_DAYS || "180", 10);
 
 /**
  * P2: 古い監査ログをクリーンアップ
  * 保持期間を超えたログを削除
  */
 export async function cleanupOldAuditLogs(): Promise<number> {
+  // 保持期間が0の場合は無制限（削除しない）
+  if (AUDIT_LOG_RETENTION_DAYS === 0) {
+    logger.info("Retention is unlimited, skipping cleanup");
+    return 0;
+  }
+
   const retentionDate = new Date();
   retentionDate.setDate(retentionDate.getDate() - AUDIT_LOG_RETENTION_DAYS);
 

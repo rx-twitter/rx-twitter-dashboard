@@ -1,5 +1,6 @@
 ---
 import Layout from '../../../layouts/Layout.astro';
+import { AuditLogs } from '../../../components/AuditLogs';
 
 const user = Astro.locals.user;
 
@@ -106,6 +107,9 @@ if (!guildId) {
           </span>
         </p>
       </div>
+
+      <!-- 監査ログセクション -->
+      <AuditLogs client:only="preact" guildId={guildId} />
     </div>
   </div>
 
