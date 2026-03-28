@@ -97,7 +97,7 @@ if (!guildId) {
       </div>
 
       <div class="save-section">
-        <button id="save-btn" class="primary-button">
+        <button id="save-btn" class="primary-button" disabled>
           💾 設定を保存
         </button>
         <p class="save-note">
@@ -470,6 +470,8 @@ if (!guildId) {
   <script define:vars={{ guildId }}>
     // 型アノテーションなしで変数を宣言
     let currentConfig = null;
+    let initialAllowAll = null;
+    let initialWhitelistedIds = [];
     let availableChannels = [];
     let manuallyAddedChannels = new Set();
 
@@ -498,8 +500,12 @@ if (!guildId) {
 
         const data = await response.json();
         currentConfig = data.data || data;
+        initialAllowAll = currentConfig.allowAllChannels;
+        initialWhitelistedIds = [...(currentConfig.whitelistedChannelIds || [])];
+        manuallyAddedChannels = new Set();
         updateUI();
         await loadChannels();
+        checkForChanges();
         
       } catch (err) {
         // Client-side error logging for browser debugging
@@ -601,6 +607,7 @@ if (!guildId) {
           if (whitelistSection) {
             whitelistSection.style.display = allowAllCheckbox.checked ? 'none' : 'block';
           }
+          checkForChanges();
         });
 
         if (whitelistSection) {
@@ -626,6 +633,38 @@ if (!guildId) {
       if (limitWarning) {
         limitWarning.style.display = count > 500 ? 'inline' : 'none';
       }
+
+      checkForChanges();
+    }
+
+    function getCurrentWhitelistedIds() {
+      const ids = [];
+      const checkboxes = document.querySelectorAll('.channel-item input[type="checkbox"]:checked');
+      checkboxes.forEach((cb) => ids.push(cb.value));
+      manuallyAddedChannels.forEach((id) => {
+        if (!ids.includes(id)) ids.push(id);
+      });
+      return ids.sort();
+    }
+
+    function checkForChanges() {
+      const saveBtn = document.getElementById('save-btn');
+      if (!saveBtn || initialAllowAll === null) return;
+
+      const allowAllCheckbox = document.getElementById('allow-all-channels');
+      if (!allowAllCheckbox) return;
+
+      const currentAllowAll = allowAllCheckbox.checked;
+      let hasChanges = currentAllowAll !== initialAllowAll;
+
+      if (!hasChanges && !currentAllowAll) {
+        const currentIds = getCurrentWhitelistedIds();
+        const sortedInitial = [...initialWhitelistedIds].sort();
+        hasChanges = currentIds.length !== sortedInitial.length ||
+          currentIds.some((id, i) => id !== sortedInitial[i]);
+      }
+
+      saveBtn.disabled = !hasChanges;
     }
 
     function showError(title, message) {
@@ -855,8 +894,8 @@ if (!guildId) {
           console.error('Failed to save config:', err);
           alert('設定の保存に失敗しました。もう一度お試しください。');
         } finally {
-          saveBtn.removeAttribute('disabled');
           saveBtn.textContent = '💾 設定を保存';
+          checkForChanges();
         }
       });
     }

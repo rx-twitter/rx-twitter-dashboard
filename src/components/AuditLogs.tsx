@@ -49,8 +49,9 @@ export const AuditLogs: FunctionComponent<AuditLogsProps> = ({ guildId, channels
     fetch(`/api/guilds/${guildId}/channels`)
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
-        if (data?.data) {
-          setChannels(data.data.map((ch: { id: string; name: string }) => ({ id: ch.id, name: ch.name })));
+        const list = data?.data?.channels;
+        if (Array.isArray(list)) {
+          setChannels(list.map((ch: { id: string; name: string }) => ({ id: ch.id, name: ch.name })));
         }
       })
       .catch(() => {});
