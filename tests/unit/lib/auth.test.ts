@@ -46,7 +46,7 @@ describe("auth", () => {
 
       expect(attrs.httpOnly).toBe(true);
       expect(attrs.secure).toBe(true);
-      expect(attrs.sameSite).toBe("strict");
+      expect(attrs.sameSite).toBe("lax");
       expect(attrs.path).toBe("/");
       expect(attrs.maxAge).toBeGreaterThan(0);
     });
@@ -56,7 +56,7 @@ describe("auth", () => {
 
       expect(attrs.secure).toBe(false);
       expect(attrs.httpOnly).toBe(true);
-      expect(attrs.sameSite).toBe("strict");
+      expect(attrs.sameSite).toBe("lax");
     });
 
     it("maxAge が 7 日間（秒）である", () => {

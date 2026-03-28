@@ -23,7 +23,7 @@ export const POST: APIRoute = async ({ locals, cookies }) => {
   return new Response(null, {
     status: 302,
     headers: {
-      Location: new URL("/", locals.url.origin).toString(),
+      Location: "/",
     },
   });
 };

@@ -56,7 +56,7 @@ export const GET: APIRoute = async ({ params, locals }) => {
       return createApiError("TOKEN_EXPIRED", "セッションの有効期限が切れました。再ログインしてください。", 401);
     }
 
-    const hasPermission = await verifyUserGuildPermission(accessToken, guildId);
+    const hasPermission = await verifyUserGuildPermission(accessToken, guildId, user.id);
     if (!hasPermission) {
       return createApiError("FORBIDDEN", "このサーバーの設定を閲覧する権限がありません", 403);
     }
@@ -179,7 +179,7 @@ export const PUT: APIRoute = async ({ params, locals, request }) => {
       return createApiError("TOKEN_EXPIRED", "セッションの有効期限が切れました。再ログインしてください。", 401);
     }
 
-    const hasPermission = await verifyUserGuildPermission(accessToken, guildId);
+    const hasPermission = await verifyUserGuildPermission(accessToken, guildId, user.id);
     if (!hasPermission) {
       return createApiError("FORBIDDEN", "このサーバーの設定を変更する権限がありません", 403);
     }
@@ -215,11 +215,7 @@ export const PUT: APIRoute = async ({ params, locals, request }) => {
     const snowflakeRegex = /^\d{17,20}$/;
     for (const channelId of whitelistedChannelIds) {
       if (typeof channelId !== "string" || !snowflakeRegex.test(channelId)) {
-        return createApiError(
-          "INVALID_CHANNEL_ID",
-          `不正なチャンネルID: ${String(channelId).slice(0, 20)}`,
-          400
-        );
+        return createApiError("INVALID_CHANNEL_ID", `不正なチャンネルID: ${String(channelId).slice(0, 20)}`, 400);
       }
     }
 

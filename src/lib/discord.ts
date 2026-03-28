@@ -1,5 +1,6 @@
 import { Discord } from "arctic";
 import { createLogger } from "./logger";
+import { redis } from "./redis";
 
 const logger = createLogger("Discord");
 
@@ -91,11 +92,31 @@ const ADMINISTRATOR = BigInt(0x8);
 
 /**
  * ユーザーが指定ギルドに対して管理権限（MANAGE_GUILD または ADMINISTRATOR）を持っているか検証
+ * Redis キャッシュを優先し、キャッシュミス時のみ Discord API を呼び出す
  * @returns true: 権限あり, false: 権限なし
  */
-export async function verifyUserGuildPermission(accessToken: string, guildId: string): Promise<boolean> {
+export async function verifyUserGuildPermission(
+  accessToken: string,
+  guildId: string,
+  userId?: string
+): Promise<boolean> {
   try {
-    const guilds = await getDiscordGuilds(accessToken);
+    let guilds: DiscordGuild[];
+
+    // キャッシュからギルド一覧を取得
+    if (userId) {
+      const cached = await redis.get(`app:user:${userId}:guilds`);
+      if (cached) {
+        guilds = JSON.parse(cached);
+      } else {
+        // キャッシュミス: API から取得してキャッシュ
+        guilds = await getDiscordGuilds(accessToken);
+        await redis.setex(`app:user:${userId}:guilds`, 60 * 60, JSON.stringify(guilds));
+      }
+    } else {
+      guilds = await getDiscordGuilds(accessToken);
+    }
+
     const targetGuild = guilds.find((g) => g.id === guildId);
 
     if (!targetGuild) {

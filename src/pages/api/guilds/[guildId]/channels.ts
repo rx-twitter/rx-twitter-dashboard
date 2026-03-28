@@ -53,7 +53,7 @@ export const GET: APIRoute = async ({ params, locals }) => {
       return createApiError("TOKEN_EXPIRED", "セッションの有効期限が切れました。再ログインしてください。", 401);
     }
 
-    const hasPermission = await verifyUserGuildPermission(accessToken, guildId);
+    const hasPermission = await verifyUserGuildPermission(accessToken, guildId, user.id);
     if (!hasPermission) {
       return createApiError("FORBIDDEN", "このサーバーのチャンネル情報を閲覧する権限がありません", 403);
     }
@@ -150,7 +150,7 @@ export const POST: APIRoute = async ({ params, locals }) => {
       return createApiError("TOKEN_EXPIRED", "セッションの有効期限が切れました。再ログインしてください。", 401);
     }
 
-    const hasPermission = await verifyUserGuildPermission(accessToken, guildId);
+    const hasPermission = await verifyUserGuildPermission(accessToken, guildId, user.id);
     if (!hasPermission) {
       return createApiError("FORBIDDEN", "このサーバーのチャンネル情報を再取得する権限がありません", 403);
     }

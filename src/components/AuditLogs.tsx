@@ -49,9 +49,9 @@ export const AuditLogs: FunctionComponent<AuditLogsProps> = ({ guildId }) => {
         throw new Error(`HTTP ${response.status}`);
       }
 
-      const data = await response.json();
-      setLogs(data.logs);
-      setTotal(data.pagination.total);
+      const result = await response.json();
+      setLogs(result.data.logs);
+      setTotal(result.data.pagination.total);
     } catch (err) {
       setError(err instanceof Error ? err.message : "エラーが発生しました");
     } finally {

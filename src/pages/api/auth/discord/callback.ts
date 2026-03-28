@@ -89,7 +89,7 @@ export const GET: APIRoute = async ({ url, cookies }) => {
     return new Response(null, {
       status: 302,
       headers: {
-        Location: new URL("/dashboard", url.origin).toString(),
+        Location: "/dashboard",
       },
     });
   } catch (err) {
