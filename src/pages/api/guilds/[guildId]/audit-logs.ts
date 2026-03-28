@@ -1,10 +1,11 @@
 import type { APIRoute } from "astro";
 import { eq, desc } from "drizzle-orm";
-import { createApiResponse, createApiError } from "@/lib/api-helpers";
-import { validateSession } from "@/lib/auth";
+import { createApiResponse, createApiError, getAccessToken } from "@/lib/api-helpers";
 import { db } from "@/lib/db";
 import { configAuditLogs, users } from "@/lib/db/schema";
+import { verifyUserGuildPermission } from "@/lib/discord";
 import { createLogger } from "@/lib/logger";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 const logger = createLogger("AuditLogsAPI");
 
@@ -12,21 +13,32 @@ const logger = createLogger("AuditLogsAPI");
  * GET /api/guilds/:guildId/audit-logs
  * 監査ログ一覧を取得
  */
-export const GET: APIRoute = async ({ params, request, cookies }) => {
+export const GET: APIRoute = async ({ params, request, locals }) => {
   const guildId = params.guildId;
   if (!guildId) {
     return createApiError("MISSING_GUILD_ID", "Guild ID is required", 400);
   }
 
-  // セッション検証
-  const sessionId = cookies.get("auth_session")?.value;
-  if (!sessionId) {
-    return createApiError("UNAUTHORIZED", "Not logged in", 401);
+  const { user, session } = locals;
+  if (!user || !session) {
+    return createApiError("UNAUTHORIZED", "ログインが必要です", 401);
   }
 
-  const sessionResult = await validateSession(sessionId);
-  if (!sessionResult || !sessionResult.session || !sessionResult.user) {
-    return createApiError("UNAUTHORIZED", "Session expired", 401);
+  // レート制限チェック（ユーザーごと: 10req/10sec）
+  const rateLimitResult = await checkRateLimit(`user:${user.id}:audit:read`, 10, 10);
+  if (!rateLimitResult.allowed) {
+    return createApiError("RATE_LIMIT_EXCEEDED", "リクエストが多すぎます。しばらくお待ちください。", 429);
+  }
+
+  // 認可チェック: ユーザーがこのギルドの管理権限を持っているか検証
+  const accessToken = await getAccessToken(session.id);
+  if (!accessToken) {
+    return createApiError("TOKEN_EXPIRED", "セッションの有効期限が切れました。再ログインしてください。", 401);
+  }
+
+  const hasPermission = await verifyUserGuildPermission(accessToken, guildId);
+  if (!hasPermission) {
+    return createApiError("FORBIDDEN", "このサーバーの監査ログを閲覧する権限がありません", 403);
   }
 
   try {
@@ -35,9 +47,17 @@ export const GET: APIRoute = async ({ params, request, cookies }) => {
     const limit = Math.min(parseInt(url.searchParams.get("limit") || "50", 10), 100);
     const offset = parseInt(url.searchParams.get("offset") || "0", 10);
 
+    // バリデーション: NaN または負の値を拒否
+    if (Number.isNaN(limit) || limit < 1) {
+      return createApiError("INVALID_REQUEST", "limit は 1 以上の整数である必要があります", 400);
+    }
+    if (Number.isNaN(offset) || offset < 0) {
+      return createApiError("INVALID_REQUEST", "offset は 0 以上の整数である必要があります", 400);
+    }
+
     logger.info("Fetching audit logs", {
       guildId,
-      userId: sessionResult.user.id,
+      userId: user.id,
       limit,
       offset,
     });
@@ -90,9 +110,8 @@ export const GET: APIRoute = async ({ params, request, cookies }) => {
   } catch (err) {
     logger.error("Failed to fetch audit logs", {
       guildId,
-      userId: sessionResult.user.id,
+      userId: user.id,
       error: err instanceof Error ? err.message : String(err),
-      stack: err instanceof Error ? err.stack : undefined,
     });
 
     return createApiError("INTERNAL_ERROR", "Failed to fetch audit logs", 500);

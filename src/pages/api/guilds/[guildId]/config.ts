@@ -1,8 +1,9 @@
 import type { APIRoute } from "astro";
 import { eq } from "drizzle-orm";
-import { createApiError, createApiResponseWithHeaders } from "@/lib/api-helpers";
+import { createApiError, createApiResponseWithHeaders, getAccessToken } from "@/lib/api-helpers";
 import { db } from "@/lib/db";
 import { channelWhitelist, configAuditLogs, guildConfigs } from "@/lib/db/schema";
+import { verifyUserGuildPermission } from "@/lib/discord";
 import { createLogger } from "@/lib/logger";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { redis } from "@/lib/redis";
@@ -15,9 +16,10 @@ const logger = createLogger("API:GuildConfig");
  */
 export const GET: APIRoute = async ({ params, locals }) => {
   const user = locals.user;
+  const session = locals.session;
   const { guildId } = params;
 
-  if (!user) {
+  if (!user || !session) {
     return createApiError("UNAUTHORIZED", "ログインが必要です", 401);
   }
 
@@ -48,6 +50,17 @@ export const GET: APIRoute = async ({ params, locals }) => {
   }
 
   try {
+    // 認可チェック: ユーザーがこのギルドの管理権限を持っているか検証
+    const accessToken = await getAccessToken(session.id);
+    if (!accessToken) {
+      return createApiError("TOKEN_EXPIRED", "セッションの有効期限が切れました。再ログインしてください。", 401);
+    }
+
+    const hasPermission = await verifyUserGuildPermission(accessToken, guildId);
+    if (!hasPermission) {
+      return createApiError("FORBIDDEN", "このサーバーの設定を閲覧する権限がありません", 403);
+    }
+
     // Bot が参加しているか確認
     const botJoined = await redis.exists(`app:guild:${guildId}:joined`);
     if (botJoined === 0) {
@@ -126,9 +139,10 @@ export const GET: APIRoute = async ({ params, locals }) => {
  */
 export const PUT: APIRoute = async ({ params, locals, request }) => {
   const user = locals.user;
+  const session = locals.session;
   const { guildId } = params;
 
-  if (!user || !user.id) {
+  if (!user || !user.id || !session) {
     return createApiError("UNAUTHORIZED", "ログインが必要です", 401);
   }
 
@@ -159,6 +173,17 @@ export const PUT: APIRoute = async ({ params, locals, request }) => {
   }
 
   try {
+    // 認可チェック: ユーザーがこのギルドの管理権限を持っているか検証
+    const accessToken = await getAccessToken(session.id);
+    if (!accessToken) {
+      return createApiError("TOKEN_EXPIRED", "セッションの有効期限が切れました。再ログインしてください。", 401);
+    }
+
+    const hasPermission = await verifyUserGuildPermission(accessToken, guildId);
+    if (!hasPermission) {
+      return createApiError("FORBIDDEN", "このサーバーの設定を変更する権限がありません", 403);
+    }
+
     // Bot が参加しているか確認
     const botJoined = await redis.exists(`app:guild:${guildId}:joined`);
     if (botJoined === 0) {
@@ -184,6 +209,18 @@ export const PUT: APIRoute = async ({ params, locals, request }) => {
     // バリデーション: whitelist 上限 500 件
     if (whitelistedChannelIds.length > 500) {
       return createApiError("WHITELIST_LIMIT_EXCEEDED", "ホワイトリストは最大 500 件までです", 400);
+    }
+
+    // バリデーション: 各 channelId が Discord Snowflake 形式であること
+    const snowflakeRegex = /^\d{17,20}$/;
+    for (const channelId of whitelistedChannelIds) {
+      if (typeof channelId !== "string" || !snowflakeRegex.test(channelId)) {
+        return createApiError(
+          "INVALID_CHANNEL_ID",
+          `不正なチャンネルID: ${String(channelId).slice(0, 20)}`,
+          400
+        );
+      }
     }
 
     // P1: If-Match ヘッダーで楽観的ロック

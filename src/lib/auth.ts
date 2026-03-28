@@ -104,7 +104,7 @@ export function getSessionCookieAttributes(secure: boolean = true) {
   return {
     httpOnly: true,
     secure,
-    sameSite: "lax" as const,
+    sameSite: "strict" as const,
     path: "/",
     maxAge: SESSION_TTL,
   };

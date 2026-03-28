@@ -78,9 +78,9 @@ export async function checkRateLimit(
       identifier,
       error: err instanceof Error ? err.message : String(err),
     });
-    // Redisエラー時は許可する（可用性優先）
+    // Redis エラー時はリクエストを拒否する（安全側に倒す）
     return {
-      allowed: true,
+      allowed: false,
       resetAt: now + windowSeconds,
     };
   }

@@ -37,8 +37,8 @@ ENV NODE_ENV=production
 RUN addgroup --system --gid 1001 nodejs \
     && adduser --system --uid 1001 astro
 
-# better-sqlite3 のビルドツールを一時的にインストール
-RUN apk add --no-cache python3 make g++
+# better-sqlite3 のビルドツールを一時的にインストールし、ビルド後に削除
+RUN apk add --no-cache --virtual .build-deps python3 make g++
 
 USER astro
 
@@ -55,7 +55,8 @@ COPY --from=builder --chown=astro:nodejs /app/dashboard/package.json ./dashboard
 # production 依存関係のみインストール（better-sqlite3 を runner 環境で再ビルド）
 # drizzle-kit はマイグレーション実行に必要なので含める
 USER root
-RUN npm ci --workspace=@twitterrx/dashboard --include=dev --omit=optional
+RUN npm ci --workspace=@twitterrx/dashboard --include=dev --omit=optional \
+    && apk del .build-deps
 USER astro
 
 # Dashboard のビルド成果物をコピー

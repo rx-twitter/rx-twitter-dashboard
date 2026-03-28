@@ -84,3 +84,31 @@ export async function getDiscordGuilds(accessToken: string): Promise<DiscordGuil
 
   return response.json();
 }
+
+// Discord 権限ビットフラグ
+const MANAGE_GUILD = BigInt(0x20);
+const ADMINISTRATOR = BigInt(0x8);
+
+/**
+ * ユーザーが指定ギルドに対して管理権限（MANAGE_GUILD または ADMINISTRATOR）を持っているか検証
+ * @returns true: 権限あり, false: 権限なし
+ */
+export async function verifyUserGuildPermission(accessToken: string, guildId: string): Promise<boolean> {
+  try {
+    const guilds = await getDiscordGuilds(accessToken);
+    const targetGuild = guilds.find((g) => g.id === guildId);
+
+    if (!targetGuild) {
+      return false;
+    }
+
+    const permissions = BigInt(targetGuild.permissions || "0");
+    return (permissions & MANAGE_GUILD) !== BigInt(0) || (permissions & ADMINISTRATOR) !== BigInt(0);
+  } catch (err) {
+    logger.error("Failed to verify guild permission", {
+      guildId,
+      error: err instanceof Error ? err.message : String(err),
+    });
+    return false;
+  }
+}

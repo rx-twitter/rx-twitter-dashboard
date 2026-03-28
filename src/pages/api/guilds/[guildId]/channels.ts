@@ -1,5 +1,6 @@
 import type { APIRoute } from "astro";
-import { createApiResponse, createApiError } from "@/lib/api-helpers";
+import { createApiResponse, createApiError, getAccessToken } from "@/lib/api-helpers";
+import { verifyUserGuildPermission } from "@/lib/discord";
 import { createLogger } from "@/lib/logger";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { redis } from "@/lib/redis";
@@ -12,9 +13,10 @@ const logger = createLogger("API:Channels");
  */
 export const GET: APIRoute = async ({ params, locals }) => {
   const user = locals.user;
+  const session = locals.session;
   const { guildId } = params;
 
-  if (!user) {
+  if (!user || !session) {
     return createApiError("UNAUTHORIZED", "ログインが必要です", 401);
   }
 
@@ -45,6 +47,17 @@ export const GET: APIRoute = async ({ params, locals }) => {
   }
 
   try {
+    // 認可チェック: ユーザーがこのギルドの管理権限を持っているか検証
+    const accessToken = await getAccessToken(session.id);
+    if (!accessToken) {
+      return createApiError("TOKEN_EXPIRED", "セッションの有効期限が切れました。再ログインしてください。", 401);
+    }
+
+    const hasPermission = await verifyUserGuildPermission(accessToken, guildId);
+    if (!hasPermission) {
+      return createApiError("FORBIDDEN", "このサーバーのチャンネル情報を閲覧する権限がありません", 403);
+    }
+
     // Bot が参加しているか確認
     const botJoined = await redis.exists(`app:guild:${guildId}:joined`);
     if (botJoined === 0) {
@@ -97,9 +110,10 @@ export const GET: APIRoute = async ({ params, locals }) => {
  */
 export const POST: APIRoute = async ({ params, locals }) => {
   const user = locals.user;
+  const session = locals.session;
   const { guildId } = params;
 
-  if (!user) {
+  if (!user || !session) {
     return createApiError("UNAUTHORIZED", "ログインが必要です", 401);
   }
 
@@ -130,6 +144,17 @@ export const POST: APIRoute = async ({ params, locals }) => {
   }
 
   try {
+    // 認可チェック: ユーザーがこのギルドの管理権限を持っているか検証
+    const accessToken = await getAccessToken(session.id);
+    if (!accessToken) {
+      return createApiError("TOKEN_EXPIRED", "セッションの有効期限が切れました。再ログインしてください。", 401);
+    }
+
+    const hasPermission = await verifyUserGuildPermission(accessToken, guildId);
+    if (!hasPermission) {
+      return createApiError("FORBIDDEN", "このサーバーのチャンネル情報を再取得する権限がありません", 403);
+    }
+
     // Bot が参加しているか確認
     const botJoined = await redis.exists(`app:guild:${guildId}:joined`);
     if (botJoined === 0) {
