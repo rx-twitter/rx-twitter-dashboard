@@ -10,13 +10,13 @@ interface AuditLogEntry {
   oldVersion: number | null;
   newVersion: number;
   changes: {
-    allowAllChannels?: {
-      old: boolean;
-      new: boolean;
+    previous?: {
+      allowAllChannels: boolean;
+      whitelistedChannelIds: string[];
     };
-    whitelist?: {
-      added: string[];
-      removed: string[];
+    current?: {
+      allowAllChannels: boolean;
+      whitelistedChannelIds: string[];
     };
   };
   createdAt: string;
@@ -93,19 +93,29 @@ export const AuditLogs: FunctionComponent<AuditLogsProps> = ({ guildId }) => {
   const renderChanges = (entry: AuditLogEntry) => {
     const changes: string[] = [];
 
-    if (entry.changes.allowAllChannels) {
-      const { old: oldVal, new: newVal } = entry.changes.allowAllChannels;
-      changes.push(`全チャンネル許可: ${oldVal ? "ON" : "OFF"} → ${newVal ? "ON" : "OFF"}`);
+    const prev = entry.changes.previous;
+    const curr = entry.changes.current;
+
+    if (!prev || !curr) {
+      return "変更なし";
     }
 
-    if (entry.changes.whitelist) {
-      const { added, removed } = entry.changes.whitelist;
-      if (added.length > 0) {
-        changes.push(`追加: ${added.length}件`);
-      }
-      if (removed.length > 0) {
-        changes.push(`削除: ${removed.length}件`);
-      }
+    if (prev.allowAllChannels !== curr.allowAllChannels) {
+      changes.push(
+        `全チャンネル許可: ${prev.allowAllChannels ? "ON" : "OFF"} → ${curr.allowAllChannels ? "ON" : "OFF"}`
+      );
+    }
+
+    const prevIds = new Set(prev.whitelistedChannelIds || []);
+    const currIds = new Set(curr.whitelistedChannelIds || []);
+    const added = [...currIds].filter((id) => !prevIds.has(id));
+    const removed = [...prevIds].filter((id) => !currIds.has(id));
+
+    if (added.length > 0) {
+      changes.push(`チャンネル追加: ${added.length}件`);
+    }
+    if (removed.length > 0) {
+      changes.push(`チャンネル削除: ${removed.length}件`);
     }
 
     return changes.length > 0 ? changes.join(", ") : "変更なし";
