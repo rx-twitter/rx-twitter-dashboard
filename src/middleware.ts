@@ -4,6 +4,19 @@ import { validateSession, getSessionCookieAttributes } from "./lib/auth";
 // セッションクッキー名
 const SESSION_COOKIE_NAME = "session";
 
+/**
+ * セキュリティヘッダーを付与するヘルパー
+ * 全レスポンスに共通のセキュリティヘッダーを追加する
+ */
+function addSecurityHeaders(response: Response): Response {
+  response.headers.set("X-Content-Type-Options", "nosniff");
+  response.headers.set("X-Frame-Options", "DENY");
+  response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
+  response.headers.set("X-XSS-Protection", "0");
+  response.headers.set("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
+  return response;
+}
+
 export const onRequest = defineMiddleware(async (context, next) => {
   const sessionId = context.cookies.get(SESSION_COOKIE_NAME)?.value ?? null;
 
@@ -20,7 +33,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
       return context.redirect("/auth/session-expired?message=" + encodeURIComponent("ログインが必要です"));
     }
 
-    return next();
+    return addSecurityHeaders(await next());
   }
 
   const result = await validateSession(sessionId);
@@ -56,14 +69,5 @@ export const onRequest = defineMiddleware(async (context, next) => {
 
   context.locals.url = context.url;
 
-  const response = await next();
-
-  // セキュリティヘッダーを追加
-  response.headers.set("X-Content-Type-Options", "nosniff");
-  response.headers.set("X-Frame-Options", "DENY");
-  response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
-  response.headers.set("X-XSS-Protection", "0");
-  response.headers.set("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
-
-  return response;
+  return addSecurityHeaders(await next());
 });
