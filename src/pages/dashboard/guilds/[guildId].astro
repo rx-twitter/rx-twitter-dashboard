@@ -888,6 +888,7 @@ if (!guildId) {
 
           // 設定を再読み込み（最新の状態を取得）
           await loadConfig();
+          window.dispatchEvent(new CustomEvent('config-saved'));
 
         } catch (err) {
           // Client-side error logging for browser debugging

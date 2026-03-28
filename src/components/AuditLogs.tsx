@@ -86,6 +86,15 @@ export const AuditLogs: FunctionComponent<AuditLogsProps> = ({ guildId, channels
     fetchLogs(page * limit);
   }, [page, guildId, limit]);
 
+  useEffect(() => {
+    const onConfigSaved = () => {
+      setPage(0);
+      fetchLogs(0);
+    };
+    window.addEventListener("config-saved", onConfigSaved);
+    return () => window.removeEventListener("config-saved", onConfigSaved);
+  }, [guildId]);
+
   const formatDate = (isoString: string) => {
     const date = new Date(isoString);
     return new Intl.DateTimeFormat("ja-JP", {
@@ -96,21 +105,6 @@ export const AuditLogs: FunctionComponent<AuditLogsProps> = ({ guildId, channels
       minute: "2-digit",
       second: "2-digit",
     }).format(date);
-  };
-
-  const formatAction = (action: string) => {
-    switch (action) {
-      case "create":
-        return "作成";
-      case "update":
-        return "更新";
-      case "create_default":
-        return "デフォルト作成";
-      case "manual_initialize":
-        return "手動初期化";
-      default:
-        return action;
-    }
   };
 
   const getChangeSummary = (entry: AuditLogEntry) => {
@@ -241,17 +235,17 @@ export const AuditLogs: FunctionComponent<AuditLogsProps> = ({ guildId, channels
         <table class="audit-logs-table">
           <thead>
             <tr>
+              <th class="audit-th-no">No.</th>
               <th>日時</th>
-              <th>操作</th>
               <th>変更内容</th>
               <th>変更者</th>
-              <th>バージョン</th>
             </tr>
           </thead>
           <tbody>
-            {logs.map((entry) => {
+            {logs.map((entry, index) => {
               const expandable = hasDetails(entry);
               const isExpanded = expandedId === entry.id;
+              const no = total - page * limit - index;
               return (
                 <>
                   <tr
@@ -259,22 +253,17 @@ export const AuditLogs: FunctionComponent<AuditLogsProps> = ({ guildId, channels
                     class={`${expandable ? "audit-row-expandable" : ""} ${isExpanded ? "audit-row-expanded" : ""}`}
                     onClick={() => expandable && setExpandedId(isExpanded ? null : entry.id)}
                   >
+                    <td class="audit-log-no">{no}</td>
                     <td class="audit-log-date">
                       {expandable && <span class={`audit-expand-icon ${isExpanded ? "open" : ""}`}>▶</span>}
                       {formatDate(entry.createdAt)}
                     </td>
-                    <td class="audit-log-action">{formatAction(entry.action)}</td>
                     <td class="audit-log-changes">{getChangeSummary(entry)}</td>
                     <td class="audit-log-user">{entry.username || `User ${entry.userId}`}</td>
-                    <td class="audit-log-version">
-                      {entry.oldVersion !== null
-                        ? `v${entry.oldVersion} → v${entry.newVersion}`
-                        : `v${entry.newVersion}`}
-                    </td>
                   </tr>
                   {isExpanded && (
                     <tr key={`${entry.id}-detail`} class="audit-detail-row">
-                      <td colSpan={5}>{renderDetails(entry)}</td>
+                      <td colSpan={4}>{renderDetails(entry)}</td>
                     </tr>
                   )}
                 </>
@@ -370,9 +359,12 @@ export const AuditLogs: FunctionComponent<AuditLogsProps> = ({ guildId, channels
           color: #6c757d;
         }
 
-        .audit-log-action {
-          font-weight: 500;
-          color: #495057;
+        .audit-th-no,
+        .audit-log-no {
+          width: 3.5rem;
+          text-align: center;
+          font-variant-numeric: tabular-nums;
+          color: #6c757d;
         }
 
         .audit-log-changes {
@@ -380,12 +372,6 @@ export const AuditLogs: FunctionComponent<AuditLogsProps> = ({ guildId, channels
         }
 
         .audit-log-user {
-          color: #6c757d;
-        }
-
-        .audit-log-version {
-          font-family: monospace;
-          font-size: 0.9rem;
           color: #6c757d;
         }
 
