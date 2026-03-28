@@ -15,7 +15,7 @@ const LOG_LEVEL = process.env.LOG_LEVEL || "info";
 const consoleFormat = winston.format.printf(({ timestamp, level, message, context, ...meta }) => {
   const contextStr = context ? `[${context}]` : "";
   const metaStr = Object.keys(meta).length ? ` ${JSON.stringify(meta)}` : "";
-  return `${timestamp} [${level.toUpperCase()}] ${contextStr} ${message}${metaStr}`;
+  return `${timestamp} [${level}] ${contextStr} ${message}${metaStr}`;
 });
 
 // JSON フォーマット（ファイル出力・構造化ログ用）
@@ -31,6 +31,10 @@ const transports: winston.transport[] = [
   new winston.transports.Console({
     format: winston.format.combine(
       winston.format.timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),
+      winston.format((info) => {
+        info.level = info.level.toUpperCase();
+        return info;
+      })(),
       winston.format.colorize(),
       consoleFormat
     ),

@@ -98,8 +98,11 @@ export const GET: APIRoute = async ({ locals }) => {
       })
     );
 
+    // Bot が参加しているサーバーのみをフィルタリング
+    const joinedGuilds = guildsWithBotStatus.filter((guild) => guild.botJoined);
+
     return createApiResponse({
-      guilds: guildsWithBotStatus,
+      guilds: joinedGuilds,
     });
   } catch (err) {
     logger.error("Failed to fetch guilds", {
