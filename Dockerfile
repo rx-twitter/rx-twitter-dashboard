@@ -1,6 +1,7 @@
 FROM node:24-alpine AS builder
 
 # better-sqlite3 のビルドに必要なツールをインストール
+# hadolint ignore=DL3018
 RUN apk add --no-cache python3 make g++
 
 WORKDIR /app
@@ -25,8 +26,8 @@ RUN npm run build --workspace=@twitterrx/shared
 
 # Dashboard のソースをコピーしてビルド
 COPY dashboard ./dashboard
-RUN npm run db:generate --workspace=@twitterrx/dashboard
-RUN npm run build --workspace=@twitterrx/dashboard
+RUN npm run db:generate --workspace=@twitterrx/dashboard && \
+    npm run build --workspace=@twitterrx/dashboard
 
 FROM node:24-alpine AS runner
 
@@ -38,6 +39,7 @@ RUN addgroup --system --gid 1001 nodejs \
     && adduser --system --uid 1001 astro
 
 # better-sqlite3 のビルドツールを一時的にインストールし、ビルド後に削除
+# hadolint ignore=DL3018
 RUN apk add --no-cache --virtual .build-deps python3 make g++
 
 USER astro
