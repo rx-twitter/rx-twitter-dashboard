@@ -1,0 +1,9 @@
+{
+  "packages": {
+    ".": {
+      "release-type": "node",
+      "component": "dashboard",
+      "changelog-path": "CHANGELOG.md"
+    }
+  }
+}
