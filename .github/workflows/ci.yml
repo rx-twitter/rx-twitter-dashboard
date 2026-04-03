@@ -18,9 +18,9 @@ jobs:
           cache: "npm"
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
-      - name: Run ESLint
+      - name: Run OxLint
         run: npm run lint
 
   test:
@@ -37,7 +37,7 @@ jobs:
           cache: "npm"
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
       - name: Run tests with coverage
         run: npm run test:coverage
@@ -56,7 +56,7 @@ jobs:
           cache: "npm"
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
       - name: Generate Drizzle migrations
         run: npm run db:generate
