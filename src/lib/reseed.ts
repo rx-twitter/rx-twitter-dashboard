@@ -1,8 +1,9 @@
 import { eq } from "drizzle-orm";
+
 import { db } from "./db";
 import { guildConfigs, channelWhitelist } from "./db/schema";
-import { redis } from "./redis";
 import { createLogger } from "./logger";
+import { redis } from "./redis";
 
 const logger = createLogger("Reseed");
 
@@ -43,7 +44,8 @@ export async function reseedRedisFromSQLite(): Promise<void> {
   try {
     // P1: スキーマバージョンをチェック
     const storedVersion = await redis.get(SCHEMA_VERSION_KEY);
-    const needsFullReseed = !storedVersion || parseInt(storedVersion, 10) !== CURRENT_SCHEMA_VERSION;
+    const needsFullReseed =
+      !storedVersion || parseInt(storedVersion, 10) !== CURRENT_SCHEMA_VERSION;
 
     if (needsFullReseed) {
       logger.info("Schema version mismatch, performing full reseed", {
@@ -130,14 +132,21 @@ async function reseedSpecificGuilds(guildIds: string[]): Promise<void> {
  * 単一ギルドの設定をRedisに保存
  */
 async function reseedSingleGuild(guildId: string): Promise<void> {
-  const config = await db.select().from(guildConfigs).where(eq(guildConfigs.guildId, guildId)).limit(1);
+  const config = await db
+    .select()
+    .from(guildConfigs)
+    .where(eq(guildConfigs.guildId, guildId))
+    .limit(1);
 
   if (config.length === 0) {
     logger.warn("Config not found for guild", { guildId });
     return;
   }
 
-  const whitelist = await db.select().from(channelWhitelist).where(eq(channelWhitelist.guildId, guildId));
+  const whitelist = await db
+    .select()
+    .from(channelWhitelist)
+    .where(eq(channelWhitelist.guildId, guildId));
 
   const configData = {
     guildId: config[0].guildId,
@@ -169,7 +178,11 @@ export async function reconcileConfigs(joinedGuildIds: string[]): Promise<void> 
 
     if (!exists) {
       // Redis に存在しない場合、SQLite から取得して補完
-      const config = await db.select().from(guildConfigs).where(eq(guildConfigs.guildId, guildId)).limit(1);
+      const config = await db
+        .select()
+        .from(guildConfigs)
+        .where(eq(guildConfigs.guildId, guildId))
+        .limit(1);
 
       if (config.length > 0) {
         // 既存の設定があればそれを使用

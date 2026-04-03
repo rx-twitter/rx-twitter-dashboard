@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
+
 import {
   createApiResponse,
   createApiError,
@@ -182,7 +183,7 @@ describe("api-helpers", () => {
             JSON.stringify({
               encryptedAccessToken: "encrypted",
               expiresAt: Date.now() - 10000, // 過去
-            })
+            }),
           ),
         },
       }));
@@ -203,7 +204,7 @@ describe("api-helpers", () => {
             JSON.stringify({
               encryptedAccessToken: "encrypted-token",
               expiresAt: Date.now() + 100000, // 未来
-            })
+            }),
           ),
         },
       }));

@@ -1,4 +1,5 @@
 import Redis from "ioredis";
+
 import { createLogger } from "./logger";
 
 const logger = createLogger("Redis");

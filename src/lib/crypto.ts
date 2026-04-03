@@ -1,4 +1,5 @@
 import { createCipheriv, createDecipheriv, randomBytes, scryptSync } from "crypto";
+
 import { createLogger } from "./logger";
 
 const logger = createLogger("Crypto");

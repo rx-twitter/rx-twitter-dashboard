@@ -1,5 +1,5 @@
-import { redis } from "./redis";
 import { createLogger } from "./logger";
+import { redis } from "./redis";
 
 const logger = createLogger("RateLimit");
 
@@ -54,7 +54,7 @@ interface RateLimitResult {
 export async function checkRateLimit(
   identifier: string,
   windowSeconds: number,
-  limit: number
+  limit: number,
 ): Promise<RateLimitResult> {
   const key = `ratelimit:${identifier}`;
   const now = Math.floor(Date.now() / 1000);
@@ -66,7 +66,7 @@ export async function checkRateLimit(
       key,
       now.toString(),
       windowSeconds.toString(),
-      limit.toString()
+      limit.toString(),
     )) as [number, number];
 
     return {

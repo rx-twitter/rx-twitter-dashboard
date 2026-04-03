@@ -1,5 +1,6 @@
 import type { APIRoute } from "astro";
 import { eq } from "drizzle-orm";
+
 import { createSession, getSessionCookieAttributes } from "@/lib/auth";
 import { encryptToken } from "@/lib/crypto";
 import { generateCsrfToken } from "@/lib/csrf";
@@ -38,7 +39,11 @@ export const GET: APIRoute = async ({ url, cookies }) => {
     const discordUser = await getDiscordUser(accessToken);
 
     // ユーザーをDB に保存または更新
-    const existingUser = await db.select().from(users).where(eq(users.discordId, discordUser.id)).get();
+    const existingUser = await db
+      .select()
+      .from(users)
+      .where(eq(users.discordId, discordUser.id))
+      .get();
 
     let userId: string;
 
@@ -74,7 +79,7 @@ export const GET: APIRoute = async ({ url, cookies }) => {
     await redis.setex(
       `app:user:${userId}:guilds`,
       60 * 60, // 1時間
-      JSON.stringify(guilds)
+      JSON.stringify(guilds),
     );
 
     // CSRFトークンを生成

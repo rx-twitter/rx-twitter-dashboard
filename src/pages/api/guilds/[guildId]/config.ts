@@ -1,5 +1,6 @@
 import type { APIRoute } from "astro";
 import { eq } from "drizzle-orm";
+
 import { createApiError, createApiResponseWithHeaders, getAccessToken } from "@/lib/api-helpers";
 import { db } from "@/lib/db";
 import { channelWhitelist, configAuditLogs, guildConfigs } from "@/lib/db/schema";
@@ -41,7 +42,7 @@ export const GET: APIRoute = async ({ params, locals }) => {
           "Retry-After": Math.ceil(rateLimitResult.resetAt - Date.now() / 1000).toString(),
           "Cache-Control": "no-store",
         },
-      }
+      },
     );
   }
 
@@ -53,7 +54,11 @@ export const GET: APIRoute = async ({ params, locals }) => {
     // 認可チェック: ユーザーがこのギルドの管理権限を持っているか検証
     const accessToken = await getAccessToken(session.id);
     if (!accessToken) {
-      return createApiError("TOKEN_EXPIRED", "セッションの有効期限が切れました。再ログインしてください。", 401);
+      return createApiError(
+        "TOKEN_EXPIRED",
+        "セッションの有効期限が切れました。再ログインしてください。",
+        401,
+      );
     }
 
     const hasPermission = await verifyUserGuildPermission(accessToken, guildId, user.id);
@@ -67,7 +72,7 @@ export const GET: APIRoute = async ({ params, locals }) => {
       return createApiError(
         "BOT_NOT_JOINED_OR_OFFLINE",
         "Bot がこのサーバーに参加していないか、オフラインの可能性があります",
-        404
+        404,
       );
     }
 
@@ -122,7 +127,7 @@ export const GET: APIRoute = async ({ params, locals }) => {
       {
         // P1: ETag 形式の厳格化
         ETag: `"${config.version}"`,
-      }
+      },
     );
   } catch (err) {
     logger.error("Failed to fetch guild config", {
@@ -164,7 +169,7 @@ export const PUT: APIRoute = async ({ params, locals, request }) => {
           "Retry-After": Math.ceil(rateLimitResult.resetAt - Date.now() / 1000).toString(),
           "Cache-Control": "no-store",
         },
-      }
+      },
     );
   }
 
@@ -176,7 +181,11 @@ export const PUT: APIRoute = async ({ params, locals, request }) => {
     // 認可チェック: ユーザーがこのギルドの管理権限を持っているか検証
     const accessToken = await getAccessToken(session.id);
     if (!accessToken) {
-      return createApiError("TOKEN_EXPIRED", "セッションの有効期限が切れました。再ログインしてください。", 401);
+      return createApiError(
+        "TOKEN_EXPIRED",
+        "セッションの有効期限が切れました。再ログインしてください。",
+        401,
+      );
     }
 
     const hasPermission = await verifyUserGuildPermission(accessToken, guildId, user.id);
@@ -190,7 +199,7 @@ export const PUT: APIRoute = async ({ params, locals, request }) => {
       return createApiError(
         "BOT_NOT_JOINED_OR_OFFLINE",
         "Bot がこのサーバーに参加していないか、オフラインの可能性があります",
-        404
+        404,
       );
     }
 
@@ -199,11 +208,19 @@ export const PUT: APIRoute = async ({ params, locals, request }) => {
     const { allowAllChannels, whitelistedChannelIds } = body;
 
     if (typeof allowAllChannels !== "boolean") {
-      return createApiError("INVALID_REQUEST", "allowAllChannels は boolean 型である必要があります", 400);
+      return createApiError(
+        "INVALID_REQUEST",
+        "allowAllChannels は boolean 型である必要があります",
+        400,
+      );
     }
 
     if (!Array.isArray(whitelistedChannelIds)) {
-      return createApiError("INVALID_REQUEST", "whitelistedChannelIds は配列である必要があります", 400);
+      return createApiError(
+        "INVALID_REQUEST",
+        "whitelistedChannelIds は配列である必要があります",
+        400,
+      );
     }
 
     // バリデーション: whitelist 上限 500 件
@@ -215,7 +232,11 @@ export const PUT: APIRoute = async ({ params, locals, request }) => {
     const snowflakeRegex = /^\d{17,20}$/;
     for (const channelId of whitelistedChannelIds) {
       if (typeof channelId !== "string" || !snowflakeRegex.test(channelId)) {
-        return createApiError("INVALID_CHANNEL_ID", `不正なチャンネルID: ${String(channelId).slice(0, 20)}`, 400);
+        return createApiError(
+          "INVALID_CHANNEL_ID",
+          `不正なチャンネルID: ${String(channelId).slice(0, 20)}`,
+          400,
+        );
       }
     }
 
@@ -247,7 +268,7 @@ export const PUT: APIRoute = async ({ params, locals, request }) => {
       return createApiError(
         "VERSION_CONFLICT",
         "設定が他のユーザーによって更新されました。ページを再読み込みしてください。",
-        409
+        409,
       );
     }
 
@@ -284,7 +305,7 @@ export const PUT: APIRoute = async ({ params, locals, request }) => {
             whitelistedChannelIds.map((channelId: string) => ({
               guildId,
               channelId,
-            }))
+            })),
           )
           .run();
       }
@@ -342,7 +363,8 @@ export const PUT: APIRoute = async ({ params, locals, request }) => {
           success: false,
           error: {
             code: "REDIS_SAVE_FAILED",
-            message: "設定は保存されましたが、Redis への反映に失敗しました。数分後に自動で反映されます。",
+            message:
+              "設定は保存されましたが、Redis への反映に失敗しました。数分後に自動で反映されます。",
             savedVersion: newConfig.version,
             guildId,
           },
@@ -353,7 +375,7 @@ export const PUT: APIRoute = async ({ params, locals, request }) => {
             "Content-Type": "application/json",
             "Cache-Control": "no-store",
           },
-        }
+        },
       );
     }
 
@@ -366,7 +388,7 @@ export const PUT: APIRoute = async ({ params, locals, request }) => {
           guildId,
           version: newConfig.version,
           updatedAt: newConfig.updatedAt,
-        })
+        }),
       );
     } catch (publishErr) {
       logger.error("Failed to publish update", {
@@ -387,7 +409,7 @@ export const PUT: APIRoute = async ({ params, locals, request }) => {
         200,
         {
           ETag: `"${newConfig.version}"`,
-        }
+        },
       );
     }
 
@@ -399,7 +421,7 @@ export const PUT: APIRoute = async ({ params, locals, request }) => {
       200,
       {
         ETag: `"${newConfig.version}"`,
-      }
+      },
     );
   } catch (err) {
     logger.error("Failed to save guild config", {

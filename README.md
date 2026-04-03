@@ -65,6 +65,7 @@ docker run -p 4321:4321 \
 ## 次のステップ
 
 Phase 2: Bot 側統合
+
 - `IChannelConfigRepository` インターフェース
 - `RedisChannelConfigRepository` 実装
 - LRU キャッシュ + pub/sub

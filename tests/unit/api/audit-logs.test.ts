@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
+
 import { createMockLocals } from "../../helpers";
 
 // 共通モック
@@ -72,7 +73,7 @@ describe("API: /api/guilds/[guildId]/audit-logs", () => {
   async function callGET(
     guildId: string = "123456789012345678",
     queryParams: Record<string, string> = {},
-    locals = createMockLocals()
+    locals = createMockLocals(),
   ) {
     const url = new URL(`http://localhost/api/guilds/${guildId}/audit-logs`);
     for (const [key, value] of Object.entries(queryParams)) {
@@ -88,7 +89,11 @@ describe("API: /api/guilds/[guildId]/audit-logs", () => {
   }
 
   it("未認証の場合 401 を返す", async () => {
-    const response = await callGET("123456789012345678", {}, createMockLocals({ authenticated: false }));
+    const response = await callGET(
+      "123456789012345678",
+      {},
+      createMockLocals({ authenticated: false }),
+    );
     expect(response.status).toBe(401);
     const body = await response.json();
     expect(body.error.code).toBe("UNAUTHORIZED");

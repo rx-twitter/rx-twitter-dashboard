@@ -32,7 +32,10 @@ interface AuditLogsProps {
   channels?: ChannelInfo[];
 }
 
-export const AuditLogs: FunctionComponent<AuditLogsProps> = ({ guildId, channels: channelsProp = [] }) => {
+export const AuditLogs: FunctionComponent<AuditLogsProps> = ({
+  guildId,
+  channels: channelsProp = [],
+}) => {
   const [logs, setLogs] = useState<AuditLogEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -51,7 +54,9 @@ export const AuditLogs: FunctionComponent<AuditLogsProps> = ({ guildId, channels
       .then((data) => {
         const list = data?.data?.channels;
         if (Array.isArray(list)) {
-          setChannels(list.map((ch: { id: string; name: string }) => ({ id: ch.id, name: ch.name })));
+          setChannels(
+            list.map((ch: { id: string; name: string }) => ({ id: ch.id, name: ch.name })),
+          );
         }
       })
       .catch(() => {});
@@ -62,7 +67,9 @@ export const AuditLogs: FunctionComponent<AuditLogsProps> = ({ guildId, channels
     setError(null);
 
     try {
-      const response = await fetch(`/api/guilds/${guildId}/audit-logs?limit=${limit}&offset=${offset}`);
+      const response = await fetch(
+        `/api/guilds/${guildId}/audit-logs?limit=${limit}&offset=${offset}`,
+      );
 
       if (!response.ok) {
         if (response.status === 401) {
@@ -116,7 +123,7 @@ export const AuditLogs: FunctionComponent<AuditLogsProps> = ({ guildId, channels
 
     if (prev.allowAllChannels !== curr.allowAllChannels) {
       changes.push(
-        `全チャンネル許可: ${prev.allowAllChannels ? "ON" : "OFF"} → ${curr.allowAllChannels ? "ON" : "OFF"}`
+        `全チャンネル許可: ${prev.allowAllChannels ? "ON" : "OFF"} → ${curr.allowAllChannels ? "ON" : "OFF"}`,
       );
     }
 
@@ -141,7 +148,9 @@ export const AuditLogs: FunctionComponent<AuditLogsProps> = ({ guildId, channels
     const added = [...currIds].filter((id) => !prevIds.has(id));
     const removed = [...prevIds].filter((id) => !currIds.has(id));
 
-    return prev.allowAllChannels !== curr.allowAllChannels || added.length > 0 || removed.length > 0;
+    return (
+      prev.allowAllChannels !== curr.allowAllChannels || added.length > 0 || removed.length > 0
+    );
   };
 
   const formatChannelName = (id: string) => {
@@ -255,7 +264,9 @@ export const AuditLogs: FunctionComponent<AuditLogsProps> = ({ guildId, channels
                   >
                     <td class="audit-log-no">{no}</td>
                     <td class="audit-log-date">
-                      {expandable && <span class={`audit-expand-icon ${isExpanded ? "open" : ""}`}>▶</span>}
+                      {expandable && (
+                        <span class={`audit-expand-icon ${isExpanded ? "open" : ""}`}>▶</span>
+                      )}
                       {formatDate(entry.createdAt)}
                     </td>
                     <td class="audit-log-changes">{getChangeSummary(entry)}</td>

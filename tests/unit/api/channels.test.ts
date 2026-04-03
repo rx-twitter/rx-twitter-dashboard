@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
+
 import { createMockLocals } from "../../helpers";
 
 // 共通モック
@@ -58,7 +59,10 @@ describe("API: /api/guilds/[guildId]/channels", () => {
     }
 
     it("未認証の場合 401 を返す", async () => {
-      const response = await callGET("123456789012345678", createMockLocals({ authenticated: false }));
+      const response = await callGET(
+        "123456789012345678",
+        createMockLocals({ authenticated: false }),
+      );
       expect(response.status).toBe(401);
       const body = await response.json();
       expect(body.error.code).toBe("UNAUTHORIZED");
@@ -148,7 +152,10 @@ describe("API: /api/guilds/[guildId]/channels", () => {
     }
 
     it("未認証の場合 401 を返す", async () => {
-      const response = await callPOST("123456789012345678", createMockLocals({ authenticated: false }));
+      const response = await callPOST(
+        "123456789012345678",
+        createMockLocals({ authenticated: false }),
+      );
       expect(response.status).toBe(401);
       const body = await response.json();
       expect(body.error.code).toBe("UNAUTHORIZED");
@@ -189,7 +196,11 @@ describe("API: /api/guilds/[guildId]/channels", () => {
       expect(body.success).toBe(true);
 
       // Redis にリフレッシュキーが設定されたことを検証
-      expect(mockRedis.setex).toHaveBeenCalledWith("app:guild:123456789012345678:channels:refresh", 60, "1");
+      expect(mockRedis.setex).toHaveBeenCalledWith(
+        "app:guild:123456789012345678:channels:refresh",
+        60,
+        "1",
+      );
     });
   });
 });

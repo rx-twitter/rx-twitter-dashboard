@@ -1,4 +1,5 @@
 import { lt } from "drizzle-orm";
+
 import { db } from "./db";
 import { configAuditLogs } from "./db/schema";
 import { createLogger } from "./logger";
@@ -31,7 +32,9 @@ export async function cleanupOldAuditLogs(): Promise<number> {
   });
 
   try {
-    const result = await db.delete(configAuditLogs).where(lt(configAuditLogs.createdAt, retentionDate.toISOString()));
+    const result = await db
+      .delete(configAuditLogs)
+      .where(lt(configAuditLogs.createdAt, retentionDate.toISOString()));
 
     const deletedCount = result.changes || 0;
 
