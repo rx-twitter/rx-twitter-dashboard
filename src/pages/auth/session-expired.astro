@@ -1,0 +1,17 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import ErrorDisplay from '@/components/ErrorDisplay.astro';
+
+const messageParam = Astro.url.searchParams.get('message');
+const message = messageParam || 'セッションの有効期限が切れました。再度ログインしてください。';
+---
+
+<Layout title="再ログインが必要です - TwitterRX Dashboard">
+  <ErrorDisplay 
+    title="🔒 再ログインが必要です"
+    message={message}
+    details="セキュリティのため、定期的な再認証が必要です。セッションの有効期限は7日間となっております。"
+    showLogin={true}
+  />
+</Layout>
+
