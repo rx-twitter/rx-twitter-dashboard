@@ -50,7 +50,9 @@ describe("discord", () => {
 
   describe("getDiscordGuilds", () => {
     it("ギルド一覧を取得する", async () => {
-      const mockGuilds = [{ id: "g1", name: "Guild 1", icon: null, owner: true, permissions: "2147483647" }];
+      const mockGuilds = [
+        { id: "g1", name: "Guild 1", icon: null, owner: true, permissions: "2147483647" },
+      ];
       mockFetch.mockResolvedValue({
         ok: true,
         json: () => Promise.resolve(mockGuilds),
@@ -84,7 +86,13 @@ describe("discord", () => {
         ok: true,
         json: () =>
           Promise.resolve([
-            { id: "guild-1", name: "Test", icon: null, owner: false, permissions: String(MANAGE_GUILD) },
+            {
+              id: "guild-1",
+              name: "Test",
+              icon: null,
+              owner: false,
+              permissions: String(MANAGE_GUILD),
+            },
           ]),
       });
 
@@ -100,7 +108,13 @@ describe("discord", () => {
         ok: true,
         json: () =>
           Promise.resolve([
-            { id: "guild-1", name: "Test", icon: null, owner: false, permissions: String(ADMINISTRATOR) },
+            {
+              id: "guild-1",
+              name: "Test",
+              icon: null,
+              owner: false,
+              permissions: String(ADMINISTRATOR),
+            },
           ]),
       });
 
@@ -113,7 +127,10 @@ describe("discord", () => {
     it("権限がないユーザーは false を返す", async () => {
       mockFetch.mockResolvedValue({
         ok: true,
-        json: () => Promise.resolve([{ id: "guild-1", name: "Test", icon: null, owner: false, permissions: "0" }]),
+        json: () =>
+          Promise.resolve([
+            { id: "guild-1", name: "Test", icon: null, owner: false, permissions: "0" },
+          ]),
       });
 
       const { verifyUserGuildPermission } = await import("@/lib/discord");
@@ -151,7 +168,8 @@ describe("discord", () => {
       const permissions = (0x20 | 0x800).toString();
       mockFetch.mockResolvedValue({
         ok: true,
-        json: () => Promise.resolve([{ id: "guild-1", name: "Test", icon: null, owner: false, permissions }]),
+        json: () =>
+          Promise.resolve([{ id: "guild-1", name: "Test", icon: null, owner: false, permissions }]),
       });
 
       const { verifyUserGuildPermission } = await import("@/lib/discord");

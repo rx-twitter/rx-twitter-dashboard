@@ -41,7 +41,7 @@ export function createApiError(code: string, message: string, status: number = 4
         "Content-Type": "application/json",
         "Cache-Control": "no-store",
       },
-    }
+    },
   );
 }
 
@@ -64,7 +64,7 @@ export function createRateLimitError(resetAt: number): Response {
         "Retry-After": Math.ceil(resetAt - Date.now() / 1000).toString(),
         "Cache-Control": "no-store",
       },
-    }
+    },
   );
 }
 
@@ -87,7 +87,7 @@ export function createNotFoundError(message: string = "リソースが見つか�
         "Content-Type": "application/json",
         "Cache-Control": "no-store", // P1: キャッシュ禁止
       },
-    }
+    },
   );
 }
 
@@ -109,7 +109,7 @@ export function createBotNotJoinedError(): Response {
         "Content-Type": "application/json",
         "Cache-Control": "no-store", // P1: 動的データなのでキャッシュ禁止
       },
-    }
+    },
   );
 }
 
@@ -119,7 +119,7 @@ export function createBotNotJoinedError(): Response {
 export function createApiResponseWithHeaders<T>(
   data: T,
   status: number = 200,
-  customHeaders: Record<string, string> = {}
+  customHeaders: Record<string, string> = {},
 ): Response {
   return new Response(JSON.stringify({ success: true, data } as ApiResponse<T>), {
     status,

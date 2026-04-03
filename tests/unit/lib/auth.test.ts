@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
+
 import { generateSessionId, getSessionCookieAttributes } from "@/lib/auth";
 
 // Redis と DB をモック（モジュールレベルの副作用を回避）
@@ -82,7 +83,11 @@ describe("auth", () => {
       expect(session.userId).toBe("user-123");
       expect(session.encryptedAccessToken).toBe("encrypted-token");
       expect(session.expiresAt).toBeGreaterThan(Date.now());
-      expect(redis.setex).toHaveBeenCalledWith(`lucia:session:${session.id}`, expect.any(Number), expect.any(String));
+      expect(redis.setex).toHaveBeenCalledWith(
+        `lucia:session:${session.id}`,
+        expect.any(Number),
+        expect.any(String),
+      );
     });
   });
 
@@ -109,7 +114,7 @@ describe("auth", () => {
           userId: "user-1",
           encryptedAccessToken: "token",
           expiresAt: Date.now() - 10000, // 過去
-        })
+        }),
       );
 
       const { validateSession } = await import("@/lib/auth");

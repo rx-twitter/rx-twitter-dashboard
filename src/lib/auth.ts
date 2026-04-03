@@ -1,8 +1,9 @@
-import { base32 } from "oslo/encoding";
 import { eq } from "drizzle-orm";
-import { redis } from "./redis";
+import { base32 } from "oslo/encoding";
+
 import { db } from "./db";
 import { users } from "./db/schema";
+import { redis } from "./redis";
 
 // セッション有効期限: 7日間
 const SESSION_TTL = 7 * 24 * 60 * 60; // seconds
@@ -33,7 +34,11 @@ export function generateSessionId(): string {
 /**
  * セッションを作成
  */
-export async function createSession(userId: string, encryptedAccessToken: string, expiresIn: number): Promise<Session> {
+export async function createSession(
+  userId: string,
+  encryptedAccessToken: string,
+  expiresIn: number,
+): Promise<Session> {
   const sessionId = generateSessionId();
   const expiresAt = Date.now() + expiresIn * 1000;
 

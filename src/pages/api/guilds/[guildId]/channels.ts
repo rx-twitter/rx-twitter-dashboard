@@ -1,4 +1,5 @@
 import type { APIRoute } from "astro";
+
 import { createApiResponse, createApiError, getAccessToken } from "@/lib/api-helpers";
 import { verifyUserGuildPermission } from "@/lib/discord";
 import { createLogger } from "@/lib/logger";
@@ -38,7 +39,7 @@ export const GET: APIRoute = async ({ params, locals }) => {
           "Retry-After": Math.ceil(rateLimitResult.resetAt - Date.now() / 1000).toString(),
           "Cache-Control": "no-store",
         },
-      }
+      },
     );
   }
 
@@ -50,12 +51,20 @@ export const GET: APIRoute = async ({ params, locals }) => {
     // 認可チェック: ユーザーがこのギルドの管理権限を持っているか検証
     const accessToken = await getAccessToken(session.id);
     if (!accessToken) {
-      return createApiError("TOKEN_EXPIRED", "セッションの有効期限が切れました。再ログインしてください。", 401);
+      return createApiError(
+        "TOKEN_EXPIRED",
+        "セッションの有効期限が切れました。再ログインしてください。",
+        401,
+      );
     }
 
     const hasPermission = await verifyUserGuildPermission(accessToken, guildId, user.id);
     if (!hasPermission) {
-      return createApiError("FORBIDDEN", "このサーバーのチャンネル情報を閲覧する権限がありません", 403);
+      return createApiError(
+        "FORBIDDEN",
+        "このサーバーのチャンネル情報を閲覧する権限がありません",
+        403,
+      );
     }
 
     // Bot が参加しているか確認
@@ -64,7 +73,7 @@ export const GET: APIRoute = async ({ params, locals }) => {
       return createApiError(
         "BOT_NOT_JOINED_OR_OFFLINE",
         "Bot がこのサーバーに参加していないか、オフラインの可能性があります",
-        404
+        404,
       );
     }
 
@@ -135,7 +144,7 @@ export const POST: APIRoute = async ({ params, locals }) => {
           "Retry-After": Math.ceil(rateLimitResult.resetAt - Date.now() / 1000).toString(),
           "Cache-Control": "no-store",
         },
-      }
+      },
     );
   }
 
@@ -147,12 +156,20 @@ export const POST: APIRoute = async ({ params, locals }) => {
     // 認可チェック: ユーザーがこのギルドの管理権限を持っているか検証
     const accessToken = await getAccessToken(session.id);
     if (!accessToken) {
-      return createApiError("TOKEN_EXPIRED", "セッションの有効期限が切れました。再ログインしてください。", 401);
+      return createApiError(
+        "TOKEN_EXPIRED",
+        "セッションの有効期限が切れました。再ログインしてください。",
+        401,
+      );
     }
 
     const hasPermission = await verifyUserGuildPermission(accessToken, guildId, user.id);
     if (!hasPermission) {
-      return createApiError("FORBIDDEN", "このサーバーのチャンネル情報を再取得する権限がありません", 403);
+      return createApiError(
+        "FORBIDDEN",
+        "このサーバーのチャンネル情報を再取得する権限がありません",
+        403,
+      );
     }
 
     // Bot が参加しているか確認
@@ -161,7 +178,7 @@ export const POST: APIRoute = async ({ params, locals }) => {
       return createApiError(
         "BOT_NOT_JOINED_OR_OFFLINE",
         "Bot がこのサーバーに参加していないか、オフラインの可能性があります",
-        404
+        404,
       );
     }
 

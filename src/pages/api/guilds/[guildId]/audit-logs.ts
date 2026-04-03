@@ -1,5 +1,6 @@
 import type { APIRoute } from "astro";
 import { eq, desc } from "drizzle-orm";
+
 import { createApiResponse, createApiError, getAccessToken } from "@/lib/api-helpers";
 import { db } from "@/lib/db";
 import { configAuditLogs, users } from "@/lib/db/schema";
@@ -27,13 +28,21 @@ export const GET: APIRoute = async ({ params, request, locals }) => {
   // レート制限チェック（ユーザーごと: 10req/10sec）
   const rateLimitResult = await checkRateLimit(`user:${user.id}:audit:read`, 10, 10);
   if (!rateLimitResult.allowed) {
-    return createApiError("RATE_LIMIT_EXCEEDED", "リクエストが多すぎます。しばらくお待ちください。", 429);
+    return createApiError(
+      "RATE_LIMIT_EXCEEDED",
+      "リクエストが多すぎます。しばらくお待ちください。",
+      429,
+    );
   }
 
   // 認可チェック: ユーザーがこのギルドの管理権限を持っているか検証
   const accessToken = await getAccessToken(session.id);
   if (!accessToken) {
-    return createApiError("TOKEN_EXPIRED", "セッションの有効期限が切れました。再ログインしてください。", 401);
+    return createApiError(
+      "TOKEN_EXPIRED",
+      "セッションの有効期限が切れました。再ログインしてください。",
+      401,
+    );
   }
 
   const hasPermission = await verifyUserGuildPermission(accessToken, guildId, user.id);
