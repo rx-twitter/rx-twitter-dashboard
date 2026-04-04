@@ -1,0 +1,34 @@
+# Changelog
+
+## [1.1.0](https://github.com/t1nyb0x/discord-twitter-embed-rx-dashboard/compare/dashboard-v1.0.0...dashboard-v1.1.0) (2026-04-04)
+
+
+### Features
+
+* Dashboard UI実装 ([3591882](https://github.com/t1nyb0x/discord-twitter-embed-rx-dashboard/commit/3591882c98cbc85da4d4ec61732fb51cf7fda6f6))
+* Dashboard UI実装 ([826d296](https://github.com/t1nyb0x/discord-twitter-embed-rx-dashboard/commit/826d296d97b9250e0df6d76236e4c9dea490c617))
+* **phase1:** implement remaining P0/P1/P2 features ([ae48c80](https://github.com/t1nyb0x/discord-twitter-embed-rx-dashboard/commit/ae48c8060767de1c5e55bd94bd9db434d95ad8a0))
+* デプロイ設定周り作成 ([5f7f674](https://github.com/t1nyb0x/discord-twitter-embed-rx-dashboard/commit/5f7f67433534b51c3b47fa154121b0f4c6d1c1c0))
+* デプロイ設定周り作成 ([73833a9](https://github.com/t1nyb0x/discord-twitter-embed-rx-dashboard/commit/73833a97af6b1a0e641975b626a0080138e90d7f))
+* ロギング充実化 ([bf619b7](https://github.com/t1nyb0x/discord-twitter-embed-rx-dashboard/commit/bf619b774c3fbbaa72282bca8e4ca50b753275af))
+* 基盤構築 ([bc54754](https://github.com/t1nyb0x/discord-twitter-embed-rx-dashboard/commit/bc547548fa3c77c0889a927a09c5aa25ac4e990d))
+* 変更履歴に表示する情報を変更 ([3cb2b44](https://github.com/t1nyb0x/discord-twitter-embed-rx-dashboard/commit/3cb2b44d74b5d641005b19da8965fb4da685df89))
+* 変更履歴の詳細表示機能を実装 ([23fa708](https://github.com/t1nyb0x/discord-twitter-embed-rx-dashboard/commit/23fa708d25a09f1a5cbff63bd43e60a54514135b))
+* 監査ログページ作成 ([16dfef3](https://github.com/t1nyb0x/discord-twitter-embed-rx-dashboard/commit/16dfef31e66583ec26a74cb2512cb54f9f9af608))
+
+
+### Bug Fixes
+
+* Botが参加しているサーバーのみをフィルタリング, ロギング処理修正 ([8f05f84](https://github.com/t1nyb0x/discord-twitter-embed-rx-dashboard/commit/8f05f84c3dc4fd49f5978bcf3fd4afb1b16b19fb))
+* Dashboard不具合修正 ([b8c208b](https://github.com/t1nyb0x/discord-twitter-embed-rx-dashboard/commit/b8c208bf6be34f14312974a2f76b38a8ff37d34a))
+* Dashboard不具合修正 ([6a1610c](https://github.com/t1nyb0x/discord-twitter-embed-rx-dashboard/commit/6a1610cdc628b20b0d27384eace178805b728aad))
+* エラー解消 ([eba8437](https://github.com/t1nyb0x/discord-twitter-embed-rx-dashboard/commit/eba843715f9037c9362e7495498cafa1f37a1127))
+* エラー解消 ([ce7e8b2](https://github.com/t1nyb0x/discord-twitter-embed-rx-dashboard/commit/ce7e8b227bab94a69cd46677f0f12b3ff8de7f89))
+* サーバー一覧デザイン修正 ([661e592](https://github.com/t1nyb0x/discord-twitter-embed-rx-dashboard/commit/661e5924cfd9ecb13b0d068fc9c1d2934caca74e))
+* チャンネル更新修正 ([5280292](https://github.com/t1nyb0x/discord-twitter-embed-rx-dashboard/commit/5280292f45bb32f4aa2d4978e3a7d3944ec66a27))
+* 初期値と同じ設定をした場合保存ボタンを非活性にするよう変更, 設定保存ボタンは変更するまで非活性であるように変更 ([53877ea](https://github.com/t1nyb0x/discord-twitter-embed-rx-dashboard/commit/53877eaebfee6c5de765c51b8b51a88d2be50556))
+* 未認証リクエストでセキュリティヘッダー付与をバイパスしていた問題を修正, tsconfig.jsonの設定追加 ([3d9db72](https://github.com/t1nyb0x/discord-twitter-embed-rx-dashboard/commit/3d9db72df81b52a9a6de1e0ae59d92d25c17f461))
+* 権限昇格の脆弱性修正 ([aa2125e](https://github.com/t1nyb0x/discord-twitter-embed-rx-dashboard/commit/aa2125e7d3dce337c4a0998599b0a735c2e3b4e3))
+* 監査ログが表示されない問題を修正、ログインが正常にできない問題を修正 ([d7c9133](https://github.com/t1nyb0x/discord-twitter-embed-rx-dashboard/commit/d7c9133331269ec01eca6ba72cd14e750e0d925e))
+* 監査ログの内容が正常に表示されなかった問題を修正 ([b3cbd81](https://github.com/t1nyb0x/discord-twitter-embed-rx-dashboard/commit/b3cbd814b01238c4369cba46dae283cb975839f0))
+* 設定保存処理修正 ([639b327](https://github.com/t1nyb0x/discord-twitter-embed-rx-dashboard/commit/639b3274f90290de53d99f25f867377bd77bee31))
