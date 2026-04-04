@@ -1,5 +1,6 @@
 import Database from "better-sqlite3";
 import { drizzle, type BetterSQLite3Database } from "drizzle-orm/better-sqlite3";
+
 import * as schema from "./schema";
 
 const DATABASE_URL = process.env.DATABASE_URL || "file:./data/dashboard.db";
@@ -16,6 +17,6 @@ export const db = new Proxy({} as BetterSQLite3Database<typeof schema>, {
       const sqlite = new Database(dbPath);
       _db = drizzle(sqlite, { schema });
     }
-    return (_db as any)[prop];
+    return Reflect.get(_db, prop);
   },
 });

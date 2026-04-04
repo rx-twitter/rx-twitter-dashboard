@@ -1,4 +1,5 @@
 import { Discord } from "arctic";
+
 import { createLogger } from "./logger";
 import { redis } from "./redis";
 
@@ -98,7 +99,7 @@ const ADMINISTRATOR = BigInt(0x8);
 export async function verifyUserGuildPermission(
   accessToken: string,
   guildId: string,
-  userId?: string
+  userId?: string,
 ): Promise<boolean> {
   try {
     let guilds: DiscordGuild[];
@@ -124,7 +125,9 @@ export async function verifyUserGuildPermission(
     }
 
     const permissions = BigInt(targetGuild.permissions || "0");
-    return (permissions & MANAGE_GUILD) !== BigInt(0) || (permissions & ADMINISTRATOR) !== BigInt(0);
+    return (
+      (permissions & MANAGE_GUILD) !== BigInt(0) || (permissions & ADMINISTRATOR) !== BigInt(0)
+    );
   } catch (err) {
     logger.error("Failed to verify guild permission", {
       guildId,

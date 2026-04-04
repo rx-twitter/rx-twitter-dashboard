@@ -1,4 +1,5 @@
 import { describe, it, expect } from "vitest";
+
 import { encryptToken, decryptToken } from "@/lib/crypto";
 
 describe("crypto", () => {

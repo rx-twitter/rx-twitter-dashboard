@@ -1,4 +1,5 @@
 import type { APIRoute } from "astro";
+
 import { createApiResponse, createApiError, getAccessToken } from "@/lib/api-helpers";
 import { createLogger } from "@/lib/logger";
 import { checkRateLimit } from "@/lib/rate-limit";
@@ -35,7 +36,7 @@ export const GET: APIRoute = async ({ locals }) => {
           "Retry-After": Math.ceil(rateLimitResult.resetAt - Date.now() / 1000).toString(),
           "Cache-Control": "no-store",
         },
-      }
+      },
     );
   }
 
@@ -44,7 +45,11 @@ export const GET: APIRoute = async ({ locals }) => {
     const accessToken = await getAccessToken(session.id);
 
     if (!accessToken) {
-      return createApiError("TOKEN_EXPIRED", "セッションの有効期限が切れました。再ログインしてください。", 401);
+      return createApiError(
+        "TOKEN_EXPIRED",
+        "セッションの有効期限が切れました。再ログインしてください。",
+        401,
+      );
     }
 
     // Discord API からユーザーのギルド一覧を取得
@@ -56,12 +61,17 @@ export const GET: APIRoute = async ({ locals }) => {
 
     if (!response.ok) {
       if (response.status === 401) {
-        return createApiError("TOKEN_EXPIRED", "セッションの有効期限が切れました。再ログインしてください。", 401);
+        return createApiError(
+          "TOKEN_EXPIRED",
+          "セッションの有効期限が切れました。再ログインしてください。",
+          401,
+        );
       }
       throw new Error(`Discord API error: ${response.status}`);
     }
 
-    const guilds: { id: string; name: string; icon: string | null; permissions: string }[] = await response.json();
+    const guilds: { id: string; name: string; icon: string | null; permissions: string }[] =
+      await response.json();
 
     // 管理権限を持つギルドのみフィルタ
     // MANAGE_GUILD (0x20) または ADMINISTRATOR (0x8) 権限
@@ -69,7 +79,9 @@ export const GET: APIRoute = async ({ locals }) => {
       const permissions = BigInt(guild.permissions || "0");
       const MANAGE_GUILD = BigInt(0x20);
       const ADMINISTRATOR = BigInt(0x8);
-      return (permissions & MANAGE_GUILD) !== BigInt(0) || (permissions & ADMINISTRATOR) !== BigInt(0);
+      return (
+        (permissions & MANAGE_GUILD) !== BigInt(0) || (permissions & ADMINISTRATOR) !== BigInt(0)
+      );
     });
 
     // Bot が参加しているかチェック（Redis の joined キー）
@@ -95,7 +107,7 @@ export const GET: APIRoute = async ({ locals }) => {
             botJoined: false,
           };
         }
-      })
+      }),
     );
 
     // Bot が参加しているサーバーのみをフィルタリング

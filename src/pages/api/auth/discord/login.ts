@@ -1,5 +1,7 @@
 import { randomBytes } from "crypto";
+
 import type { APIRoute } from "astro";
+
 import { createRateLimitError } from "@/lib/api-helpers";
 import { createAuthorizationURL } from "@/lib/discord";
 import { checkRateLimit } from "@/lib/rate-limit";

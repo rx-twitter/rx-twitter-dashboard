@@ -1,4 +1,5 @@
 import type { APIRoute } from "astro";
+
 import { invalidateSession } from "@/lib/auth";
 import { deleteCsrfToken } from "@/lib/csrf";
 

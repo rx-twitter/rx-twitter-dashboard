@@ -22,7 +22,9 @@ export async function initializeApp(): Promise<void> {
 
     logger.info("Initialization completed");
   } catch (err) {
-    logger.error("Initialization failed", { error: err instanceof Error ? err.message : String(err) });
+    logger.error("Initialization failed", {
+      error: err instanceof Error ? err.message : String(err),
+    });
     throw err;
   }
 }
@@ -38,14 +40,18 @@ function startReconcileJob(): void {
     try {
       // TODO: Bot API から参加ギルドリストを取得する
       // 現時点では Redis から既存の config キーを取得して使用
-      const configKeys = await import("./lib/redis").then((m) => m.redis.keys("app:guild:*:config"));
+      const configKeys = await import("./lib/redis").then((m) =>
+        m.redis.keys("app:guild:*:config"),
+      );
       const guildIds = configKeys.map((key) => key.split(":")[2]);
 
       if (guildIds.length > 0) {
         await reconcileConfigs(guildIds);
       }
     } catch (err) {
-      logger.error("ReconcileJob failed", { error: err instanceof Error ? err.message : String(err) });
+      logger.error("ReconcileJob failed", {
+        error: err instanceof Error ? err.message : String(err),
+      });
       // エラーが発生してもジョブは継続
     }
   }, RECONCILE_INTERVAL_MS);
@@ -56,7 +62,9 @@ function startReconcileJob(): void {
 // Astro開発サーバー起動時に実行
 if (import.meta.env.DEV) {
   initializeApp().catch((err) => {
-    logger.error("Failed to initialize", { error: err instanceof Error ? err.message : String(err) });
+    logger.error("Failed to initialize", {
+      error: err instanceof Error ? err.message : String(err),
+    });
     process.exit(1);
   });
 }

@@ -1,6 +1,7 @@
 # Phase 1 実装完了レポート
 
 ## 実装日時
+
 2026-01-10
 
 ## 完了タスク
@@ -70,6 +71,7 @@ dashboard/
 - `config_audit_log`: 監査ログ
 
 #### Drizzle 設定:
+
 - SQLite dialect
 - マイグレーション自動生成対応
 
@@ -97,6 +99,7 @@ dashboard/
    - Cookie クリア
 
 #### 実装ファイル:
+
 - `src/lib/auth.ts`: lucia-auth 設定（Redis adapter）
 - `src/lib/discord.ts`: Discord API ラッパー
 - `src/middleware.ts`: セッション検証ミドルウェア
@@ -131,6 +134,7 @@ dashboard/
   ```
 
 #### トークン暗号化:
+
 - アルゴリズム: AES-256-GCM
 - IV: 12 bytes（NIST 推奨）
 - 鍵派生: scrypt（SESSION_SECRET + ENCRYPTION_SALT）
@@ -151,23 +155,24 @@ dashboard/
 - whitelist も含めて復元
 
 #### 起動処理 (`src/startup.ts`):
+
 - 開発モード時に自動実行
 - 本番環境では Docker CMD で実行
 
 ## API エンドポイント
 
-| エンドポイント | メソッド | 説明 |
-|---------------|---------|------|
-| `/api/auth/discord/login` | GET | Discord OAuth2 ログイン |
-| `/api/auth/discord/callback` | GET | OAuth2 コールバック |
-| `/api/auth/logout` | POST | ログアウト |
+| エンドポイント               | メソッド | 説明                    |
+| ---------------------------- | -------- | ----------------------- |
+| `/api/auth/discord/login`    | GET      | Discord OAuth2 ログイン |
+| `/api/auth/discord/callback` | GET      | OAuth2 コールバック     |
+| `/api/auth/logout`           | POST     | ログアウト              |
 
 ## ページ
 
-| パス | 説明 |
-|------|------|
-| `/` | ランディングページ（未ログイン時） |
-| `/dashboard` | ダッシュボード（ログイン必須） |
+| パス         | 説明                               |
+| ------------ | ---------------------------------- |
+| `/`          | ランディングページ（未ログイン時） |
+| `/dashboard` | ダッシュボード（ログイン必須）     |
 
 ## セキュリティ対策
 
@@ -181,6 +186,7 @@ dashboard/
 ## 環境変数
 
 必須:
+
 - `DISCORD_OAUTH2_CLIENT_ID`
 - `DISCORD_OAUTH2_CLIENT_SECRET`
 - `DISCORD_OAUTH2_REDIRECT_URI`
@@ -188,6 +194,7 @@ dashboard/
 - `ENCRYPTION_SALT` (16文字以上)
 
 オプション:
+
 - `DATABASE_URL` (デフォルト: `file:./data/dashboard.db`)
 - `REDIS_URL` (デフォルト: `redis://localhost:6379`)
 - `ORPHAN_CONFIG_RETENTION_DAYS` (デフォルト: `30`)

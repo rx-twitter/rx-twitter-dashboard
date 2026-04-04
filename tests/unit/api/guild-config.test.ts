@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
+
 import { createMockLocals } from "../../helpers";
 
 // 共通モック
@@ -86,7 +87,10 @@ describe("API: /api/guilds/[guildId]/config", () => {
     }
 
     it("未認証の場合 401 を返す", async () => {
-      const response = await callGET("123456789012345678", createMockLocals({ authenticated: false }));
+      const response = await callGET(
+        "123456789012345678",
+        createMockLocals({ authenticated: false }),
+      );
       expect(response.status).toBe(401);
       const body = await response.json();
       expect(body.error.code).toBe("UNAUTHORIZED");
@@ -172,7 +176,7 @@ describe("API: /api/guilds/[guildId]/config", () => {
       guildId: string = "123456789012345678",
       body: Record<string, unknown> = { allowAllChannels: true, whitelistedChannelIds: [] },
       ifMatch: string = '"1"',
-      locals = createMockLocals()
+      locals = createMockLocals(),
     ) {
       const { PUT } = await import("@/pages/api/guilds/[guildId]/config");
       return PUT({
@@ -187,7 +191,7 @@ describe("API: /api/guilds/[guildId]/config", () => {
         "123456789012345678",
         { allowAllChannels: true, whitelistedChannelIds: [] },
         '"1"',
-        createMockLocals({ authenticated: false })
+        createMockLocals({ authenticated: false }),
       );
       expect(response.status).toBe(401);
     });
@@ -280,7 +284,7 @@ describe("API: /api/guilds/[guildId]/config", () => {
           allowAllChannels: true,
           whitelistedChannelIds: [],
         },
-        "invalid-format"
+        "invalid-format",
       );
       expect(response.status).toBe(412);
       const body = await response.json();
@@ -301,7 +305,7 @@ describe("API: /api/guilds/[guildId]/config", () => {
           allowAllChannels: false,
           whitelistedChannelIds: [],
         },
-        '"1"'
+        '"1"',
       );
       expect(response.status).toBe(409);
       const body = await response.json();

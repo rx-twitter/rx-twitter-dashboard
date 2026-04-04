@@ -22,7 +22,7 @@ const consoleFormat = winston.format.printf(({ timestamp, level, message, contex
 const jsonFormat = winston.format.combine(
   winston.format.timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),
   winston.format.errors({ stack: true }),
-  winston.format.json()
+  winston.format.json(),
 );
 
 // トランスポート設定
@@ -36,7 +36,7 @@ const transports: winston.transport[] = [
         return info;
       })(),
       winston.format.colorize(),
-      consoleFormat
+      consoleFormat,
     ),
   }),
 ];
@@ -47,7 +47,7 @@ if (process.env.NODE_ENV === "production") {
     new winston.transports.Console({
       format: jsonFormat,
       level: "info", // 本番はinfo以上のみ構造化ログに出力
-    })
+    }),
   );
 }
 
@@ -61,10 +61,14 @@ const logger = winston.createLogger({
 
 // ヘルパー関数（context付きロギング）
 export const createLogger = (context: string) => ({
-  info: (message: string, meta?: Record<string, unknown>) => logger.info(message, { context, ...meta }),
-  warn: (message: string, meta?: Record<string, unknown>) => logger.warn(message, { context, ...meta }),
-  error: (message: string, meta?: Record<string, unknown>) => logger.error(message, { context, ...meta }),
-  debug: (message: string, meta?: Record<string, unknown>) => logger.debug(message, { context, ...meta }),
+  info: (message: string, meta?: Record<string, unknown>) =>
+    logger.info(message, { context, ...meta }),
+  warn: (message: string, meta?: Record<string, unknown>) =>
+    logger.warn(message, { context, ...meta }),
+  error: (message: string, meta?: Record<string, unknown>) =>
+    logger.error(message, { context, ...meta }),
+  debug: (message: string, meta?: Record<string, unknown>) =>
+    logger.debug(message, { context, ...meta }),
 });
 
 export default logger;
