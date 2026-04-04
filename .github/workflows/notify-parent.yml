@@ -1,0 +1,24 @@
+name: Notify parent repository
+
+on:
+  push:
+    branches: ["main"]
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Dispatch to TwitterRX
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.TWITTERRX_PAT }}
+          script: |
+            await github.rest.repos.createDispatchEvent({
+              owner: 't1nyb0x',
+              repo: 'discord-twitter-embed-rx',
+              event_type: 'dashboard-updated',
+              client_payload: {
+                sha: context.sha
+              }
+            })
