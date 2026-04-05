@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.2.0](https://github.com/t1nyb0x/discord-twitter-embed-rx-dashboard/compare/dashboard-v1.1.0...dashboard-v1.2.0) (2026-04-05)
+
+
+### Features
+
+* osloを使った処理を自前のものにリプレース ([10cfaff](https://github.com/t1nyb0x/discord-twitter-embed-rx-dashboard/commit/10cfaffcc3cf9b51f0db73fcbb13c61c93a4de7d))
+* osloを使った処理を自前のものにリプレース ([67c66fe](https://github.com/t1nyb0x/discord-twitter-embed-rx-dashboard/commit/67c66fe1669e95bfe6bcf87b74db355e2bdc0c97))
+* osloを使った処理を自前のものにリプレース ([366c9ff](https://github.com/t1nyb0x/discord-twitter-embed-rx-dashboard/commit/366c9ff9e25a1979873d1caa8fa1ba5b7f6b3621))
+
 ## [1.1.0](https://github.com/t1nyb0x/discord-twitter-embed-rx-dashboard/compare/dashboard-v1.0.0...dashboard-v1.1.0) (2026-04-04)
 
 
