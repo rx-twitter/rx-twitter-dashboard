@@ -1,8 +1,8 @@
 import { eq } from "drizzle-orm";
-import { base32 } from "oslo/encoding";
 
 import { db } from "./db";
 import { users } from "./db/schema";
+import { encodeBase32 } from "./encoding";
 import { redis } from "./redis";
 
 // セッション有効期限: 7日間
@@ -28,7 +28,7 @@ export interface User {
 export function generateSessionId(): string {
   const bytes = new Uint8Array(20); // 160 bits
   crypto.getRandomValues(bytes);
-  return base32.encode(bytes);
+  return encodeBase32(bytes);
 }
 
 /**
