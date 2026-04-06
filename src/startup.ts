@@ -1,6 +1,12 @@
 import { startAuditLogCleanupJob } from "./lib/audit-cleanup";
 import { createLogger } from "./lib/logger";
+import { redis } from "./lib/redis";
 import { reconcileConfigs, reseedRedisFromSQLite } from "./lib/reseed";
+
+// Bot側の @twitterrx/shared と同じ値を維持すること
+const DASHBOARD_VERSION_KEY = "app:dashboard:version";
+const DASHBOARD_VERSION_TTL_SECONDS = 300;
+const DASHBOARD_VERSION_HEARTBEAT_INTERVAL_MS = 120_000;
 
 const logger = createLogger("Startup");
 
@@ -19,6 +25,12 @@ export async function initializeApp(): Promise<void> {
 
     // P2: 監査ログクリーンアップジョブを開始（毎日2時）
     startAuditLogCleanupJob();
+
+    // バージョン情報をRedisに書き込み
+    await writeDashboardVersion();
+
+    // バージョンTTL延長ハートビートを開始
+    startVersionHeartbeat();
 
     logger.info("Initialization completed");
   } catch (err) {
@@ -57,6 +69,32 @@ function startReconcileJob(): void {
   }, RECONCILE_INTERVAL_MS);
 
   logger.info(`Reconcile job started (interval: ${RECONCILE_INTERVAL_MS / 1000}s)`);
+}
+
+/**
+ * ダッシュボードのバージョン情報をRedisに書き込む
+ */
+async function writeDashboardVersion(): Promise<void> {
+  const { version } = await import("../package.json");
+  await redis.set(DASHBOARD_VERSION_KEY, version, "EX", DASHBOARD_VERSION_TTL_SECONDS);
+  logger.info(`Dashboard version ${version} written to Redis (TTL: ${DASHBOARD_VERSION_TTL_SECONDS}s)`);
+}
+
+/**
+ * バージョン情報のTTLを定期的に延長するハートビート
+ */
+function startVersionHeartbeat(): void {
+  setInterval(async () => {
+    try {
+      await redis.expire(DASHBOARD_VERSION_KEY, DASHBOARD_VERSION_TTL_SECONDS);
+    } catch (err) {
+      logger.error("Version heartbeat failed", {
+        error: err instanceof Error ? err.message : String(err),
+      });
+    }
+  }, DASHBOARD_VERSION_HEARTBEAT_INTERVAL_MS);
+
+  logger.info(`Version heartbeat started (interval: ${DASHBOARD_VERSION_HEARTBEAT_INTERVAL_MS / 1000}s)`);
 }
 
 // Astro開発サーバー起動時に実行
