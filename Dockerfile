@@ -80,7 +80,10 @@ WORKDIR /app/dashboard
 
 VOLUME /app/dashboard/data
 
+# 起動ラッパースクリプト
+COPY --from=builder --chown=astro:nodejs /app/dashboard/server-start.mjs ./
+
 EXPOSE 4321
 
 # 起動時にマイグレーションを実行
-CMD ["sh", "-c", "./scripts/migrate.sh && node dist/server/entry.mjs"]
+CMD ["sh", "-c", "./scripts/migrate.sh && node server-start.mjs"]

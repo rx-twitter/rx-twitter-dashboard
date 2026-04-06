@@ -97,12 +97,4 @@ function startVersionHeartbeat(): void {
   logger.info(`Version heartbeat started (interval: ${DASHBOARD_VERSION_HEARTBEAT_INTERVAL_MS / 1000}s)`);
 }
 
-// Astro開発サーバー起動時に実行
-if (import.meta.env.DEV) {
-  initializeApp().catch((err) => {
-    logger.error("Failed to initialize", {
-      error: err instanceof Error ? err.message : String(err),
-    });
-    process.exit(1);
-  });
-}
+
