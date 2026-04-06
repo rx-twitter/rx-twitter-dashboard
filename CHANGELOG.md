@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.2.1](https://github.com/t1nyb0x/discord-twitter-embed-rx-dashboard/compare/dashboard-v1.2.0...dashboard-v1.2.1) (2026-04-06)
+
+
+### Bug Fixes
+
+* ダッシュボードバージョン書き込み周り修正 ([0caf6a6](https://github.com/t1nyb0x/discord-twitter-embed-rx-dashboard/commit/0caf6a68c464a67c41df0c8003a9a56f0df0df9d))
+* 本番環境でinitializeAppが呼ばれない問題を修正 ([c8d8922](https://github.com/t1nyb0x/discord-twitter-embed-rx-dashboard/commit/c8d8922da010bd42eb53c71d24edf39863e879a1))
+
 ## [1.2.0](https://github.com/t1nyb0x/discord-twitter-embed-rx-dashboard/compare/dashboard-v1.1.0...dashboard-v1.2.0) (2026-04-05)
 
 
