@@ -1,9 +1,17 @@
 import { defineMiddleware } from "astro:middleware";
 
 import { validateSession, getSessionCookieAttributes } from "./lib/auth";
+import { initializeApp } from "./startup";
 
 // セッションクッキー名
 const SESSION_COOKIE_NAME = "session";
+
+// 初期化は一度だけ実行（dev・本番共通）
+let initPromise: Promise<void> | null = null;
+const ensureInitialized = (): Promise<void> => {
+  initPromise ??= initializeApp();
+  return initPromise;
+};
 
 /**
  * セキュリティヘッダーを付与するヘルパー
@@ -19,6 +27,9 @@ function addSecurityHeaders(response: Response): Response {
 }
 
 export const onRequest = defineMiddleware(async (context, next) => {
+  // サーバー起動後の初回リクエスト時に初期化処理を実行（一度だけ）
+  await ensureInitialized();
+
   const sessionId = context.cookies.get(SESSION_COOKIE_NAME)?.value ?? null;
 
   // P0: 認証が必要なページのパス
