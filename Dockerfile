@@ -17,11 +17,9 @@ COPY packages/shared/tsconfig.json ./packages/shared/
 COPY dashboard/package.json ./dashboard/
 COPY dashboard/tsconfig.json ./dashboard/
 
-# lockfile をサブモジュールの依存に合わせて再生成
-RUN npm install --package-lock-only
-
-# 依存関係をインストール（この層はpackage.jsonが変わらない限りキャッシュされる）
-RUN npm ci --workspace=@twitterrx/shared --workspace=@twitterrx/dashboard
+# lockfile を再生成し、依存関係をインストール（この層はpackage.jsonが変わらない限りキャッシュされる）
+RUN npm install --package-lock-only \
+    && npm ci --workspace=@twitterrx/shared --workspace=@twitterrx/dashboard
 
 # packages/shared のソースをコピーしてビルド
 COPY packages/shared ./packages/shared
