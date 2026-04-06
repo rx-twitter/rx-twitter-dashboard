@@ -1,13 +1,12 @@
-import {
-  DASHBOARD_VERSION_HEARTBEAT_INTERVAL_MS,
-  DASHBOARD_VERSION_KEY,
-  DASHBOARD_VERSION_TTL_SECONDS,
-} from "@twitterrx/shared";
-
 import { startAuditLogCleanupJob } from "./lib/audit-cleanup";
 import { createLogger } from "./lib/logger";
 import { redis } from "./lib/redis";
 import { reconcileConfigs, reseedRedisFromSQLite } from "./lib/reseed";
+
+// Bot側の @twitterrx/shared と同じ値を維持すること
+const DASHBOARD_VERSION_KEY = "app:dashboard:version";
+const DASHBOARD_VERSION_TTL_SECONDS = 300;
+const DASHBOARD_VERSION_HEARTBEAT_INTERVAL_MS = 120_000;
 
 const logger = createLogger("Startup");
 
