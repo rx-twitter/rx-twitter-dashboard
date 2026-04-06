@@ -1,4 +1,8 @@
 {
+  "[typescript]": {
+    "editor.defaultFormatter": "oxc.oxc-vscode"
+  },
+  "editor.formatOnSave": true,
   "chat.tools.terminal.autoApprove": {
     "git stash": true,
     "npx oxfmt": true
