@@ -22,7 +22,7 @@
   },
   "dependencies": {
     "@astrojs/check": "^0.9.4",
-    "@astrojs/node": "^8.3.4",
+    "@astrojs/node": "^10.0.0",
     "@astrojs/preact": "^3.5.3",
     "arctic": "^2.0.2",
     "astro": "^4.16.14",
