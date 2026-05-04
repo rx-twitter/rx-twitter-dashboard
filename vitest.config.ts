@@ -25,6 +25,10 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
+      // Dashboard は単体リポジトリとして CI が動くため @twitterrx/shared が存在しない。
+      // テスト時はローカルのスタブ（src/lib/constants.ts）を使用する。
+      // 値は packages/shared/src/constants.ts と必ず一致させること。
+      "@twitterrx/shared": path.resolve(__dirname, "./src/lib/constants.ts"),
     },
   },
 });

@@ -226,7 +226,7 @@ export const PUT: APIRoute = async ({ params, locals, request }) => {
     }
 
     // バリデーション: maxUrlsPerMessage（null / undefined、または 1〜MAX_URLS_PER_MESSAGE_LIMIT の整数）
-    const normalizedMaxUrls: number | null = (() => {
+    const normalizedMaxUrls: number | null | undefined = (() => {
       if (maxUrlsPerMessage === null || maxUrlsPerMessage === undefined) return null;
       if (
         !Number.isInteger(maxUrlsPerMessage) ||
