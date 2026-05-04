@@ -15,9 +15,13 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: 24.x
+          registry-url: "https://npm.pkg.github.com"
+          scope: "@twitterrx"
 
       - name: Install dependencies
         run: npm ci
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Save node_modules cache
         uses: actions/cache/save@v5
