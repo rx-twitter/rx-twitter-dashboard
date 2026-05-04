@@ -27,6 +27,7 @@ export const guildConfigs = sqliteTable("guild_config", {
   updatedBy: text("updated_by")
     .notNull()
     .references(() => users.id),
+  maxUrlsPerMessage: integer("max_urls_per_message"),
 });
 
 // ホワイトリスト（whitelist）

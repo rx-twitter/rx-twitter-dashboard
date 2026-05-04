@@ -13,10 +13,12 @@ interface AuditLogEntry {
     previous?: {
       allowAllChannels: boolean;
       whitelistedChannelIds: string[];
+      maxUrlsPerMessage?: number | null;
     };
     current?: {
       allowAllChannels: boolean;
       whitelistedChannelIds: string[];
+      maxUrlsPerMessage?: number | null;
     };
   };
   createdAt: string;
@@ -55,7 +57,10 @@ export const AuditLogs: FunctionComponent<AuditLogsProps> = ({
         const list = data?.data?.channels;
         if (Array.isArray(list)) {
           setChannels(
-            list.map((ch: { id: string; name: string }) => ({ id: ch.id, name: ch.name })),
+            list.map((ch: { id: string; name: string }) => ({
+              id: ch.id,
+              name: ch.name,
+            })),
           );
         }
       })
@@ -135,6 +140,14 @@ export const AuditLogs: FunctionComponent<AuditLogsProps> = ({
     if (added.length > 0) changes.push(`チャンネル追加: ${added.length}件`);
     if (removed.length > 0) changes.push(`チャンネル削除: ${removed.length}件`);
 
+    const prevMax = prev.maxUrlsPerMessage ?? null;
+    const currMax = curr.maxUrlsPerMessage ?? null;
+    if (prevMax !== currMax) {
+      const prevLabel = prevMax !== null ? `${prevMax}件` : "デフォルト(3)";
+      const currLabel = currMax !== null ? `${currMax}件` : "デフォルト(3)";
+      changes.push(`URL上限: ${prevLabel} → ${currLabel}`);
+    }
+
     return changes.length > 0 ? changes.join(", ") : "変更なし";
   };
 
@@ -148,8 +161,14 @@ export const AuditLogs: FunctionComponent<AuditLogsProps> = ({
     const added = [...currIds].filter((id) => !prevIds.has(id));
     const removed = [...prevIds].filter((id) => !currIds.has(id));
 
+    const prevMax = prev.maxUrlsPerMessage ?? null;
+    const currMax = curr.maxUrlsPerMessage ?? null;
+
     return (
-      prev.allowAllChannels !== curr.allowAllChannels || added.length > 0 || removed.length > 0
+      prev.allowAllChannels !== curr.allowAllChannels ||
+      added.length > 0 ||
+      removed.length > 0 ||
+      prevMax !== currMax
     );
   };
 
@@ -173,14 +192,19 @@ export const AuditLogs: FunctionComponent<AuditLogsProps> = ({
         {prev.allowAllChannels !== curr.allowAllChannels && (
           <div class="audit-detail-section">
             <span class="audit-detail-label">全チャンネル許可</span>
-            <span class={`audit-badge ${curr.allowAllChannels ? "badge-on" : "badge-off"}`}>
-              {prev.allowAllChannels ? "ON" : "OFF"} → {curr.allowAllChannels ? "ON" : "OFF"}
+            <span
+              class={`audit-badge ${curr.allowAllChannels ? "badge-on" : "badge-off"}`}
+            >
+              {prev.allowAllChannels ? "ON" : "OFF"} →{" "}
+              {curr.allowAllChannels ? "ON" : "OFF"}
             </span>
           </div>
         )}
         {added.length > 0 && (
           <div class="audit-detail-section">
-            <span class="audit-detail-label">追加されたチャンネル ({added.length}件)</span>
+            <span class="audit-detail-label">
+              追加されたチャンネル ({added.length}件)
+            </span>
             <ul class="audit-channel-list">
               {added.map((id) => (
                 <li key={id} class="channel-added">
@@ -192,7 +216,9 @@ export const AuditLogs: FunctionComponent<AuditLogsProps> = ({
         )}
         {removed.length > 0 && (
           <div class="audit-detail-section">
-            <span class="audit-detail-label">削除されたチャンネル ({removed.length}件)</span>
+            <span class="audit-detail-label">
+              削除されたチャンネル ({removed.length}件)
+            </span>
             <ul class="audit-channel-list">
               {removed.map((id) => (
                 <li key={id} class="channel-removed">
@@ -202,6 +228,21 @@ export const AuditLogs: FunctionComponent<AuditLogsProps> = ({
             </ul>
           </div>
         )}
+        {(() => {
+          const prevMax = prev.maxUrlsPerMessage ?? null;
+          const currMax = curr.maxUrlsPerMessage ?? null;
+          if (prevMax === currMax) return null;
+          const prevLabel = prevMax !== null ? `${prevMax}件` : "デフォルト(3)";
+          const currLabel = currMax !== null ? `${currMax}件` : "デフォルト(3)";
+          return (
+            <div class="audit-detail-section">
+              <span class="audit-detail-label">URL処理上限</span>
+              <span class="audit-badge badge-off">{prevLabel}</span>
+              {" → "}
+              <span class="audit-badge badge-on">{currLabel}</span>
+            </div>
+          );
+        })()}
       </div>
     );
   };
@@ -260,17 +301,25 @@ export const AuditLogs: FunctionComponent<AuditLogsProps> = ({
                   <tr
                     key={entry.id}
                     class={`${expandable ? "audit-row-expandable" : ""} ${isExpanded ? "audit-row-expanded" : ""}`}
-                    onClick={() => expandable && setExpandedId(isExpanded ? null : entry.id)}
+                    onClick={() =>
+                      expandable && setExpandedId(isExpanded ? null : entry.id)
+                    }
                   >
                     <td class="audit-log-no">{no}</td>
                     <td class="audit-log-date">
                       {expandable && (
-                        <span class={`audit-expand-icon ${isExpanded ? "open" : ""}`}>▶</span>
+                        <span
+                          class={`audit-expand-icon ${isExpanded ? "open" : ""}`}
+                        >
+                          ▶
+                        </span>
                       )}
                       {formatDate(entry.createdAt)}
                     </td>
                     <td class="audit-log-changes">{getChangeSummary(entry)}</td>
-                    <td class="audit-log-user">{entry.username || `User ${entry.userId}`}</td>
+                    <td class="audit-log-user">
+                      {entry.username || `User ${entry.userId}`}
+                    </td>
                   </tr>
                   {isExpanded && (
                     <tr key={`${entry.id}-detail`} class="audit-detail-row">

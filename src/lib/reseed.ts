@@ -11,7 +11,7 @@ const logger = createLogger("Reseed");
  * P1: スキーマバージョン定義
  * Redis データ構造が変更された場合はこれをインクリメント
  */
-const CURRENT_SCHEMA_VERSION = 1;
+const CURRENT_SCHEMA_VERSION = 2;
 const SCHEMA_VERSION_KEY = "app:config:schema_version";
 
 /**
@@ -154,6 +154,7 @@ async function reseedSingleGuild(guildId: string): Promise<void> {
     whitelist: whitelist.map((w) => w.channelId),
     version: config[0].version,
     updatedAt: config[0].updatedAt,
+    maxUrlsPerMessage: config[0].maxUrlsPerMessage ?? undefined,
   };
 
   // Redisに保存（TTLなし = 永続）

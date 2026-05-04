@@ -18,8 +18,12 @@ if [ -f "./data/dashboard.db" ]; then
 fi
 
 # Drizzle ORMのマイグレーションを実行
-# エラーが発生した場合、「table already exists」エラーであれば無視
-if npm run db:migrate 2>&1 | tee /tmp/migrate.log; then
+# パイプを使わず終了コードを確実に取得する
+npm run db:migrate > /tmp/migrate.log 2>&1
+MIGRATE_EXIT=$?
+cat /tmp/migrate.log
+
+if [ "$MIGRATE_EXIT" -eq 0 ]; then
   echo "Migrations completed successfully"
 else
   # エラーログに「already exists」が含まれている場合は正常とみなす

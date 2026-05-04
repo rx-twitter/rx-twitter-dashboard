@@ -1,6 +1,7 @@
 import type { APIRoute } from "astro";
 import { eq } from "drizzle-orm";
 
+import { MAX_URLS_PER_MESSAGE_LIMIT } from "@twitterrx/shared";
 import { createApiError, createApiResponseWithHeaders, getAccessToken } from "@/lib/api-helpers";
 import { db } from "@/lib/db";
 import { channelWhitelist, configAuditLogs, guildConfigs } from "@/lib/db/schema";
@@ -122,6 +123,7 @@ export const GET: APIRoute = async ({ params, locals }) => {
         whitelistedChannelIds: whitelist.map((w) => w.channelId),
         version: config.version,
         updatedAt: config.updatedAt,
+        maxUrlsPerMessage: config.maxUrlsPerMessage ?? null,
       },
       200,
       {
@@ -205,7 +207,7 @@ export const PUT: APIRoute = async ({ params, locals, request }) => {
 
     // リクエストボディを取得
     const body = await request.json();
-    const { allowAllChannels, whitelistedChannelIds } = body;
+    const { allowAllChannels, whitelistedChannelIds, maxUrlsPerMessage } = body;
 
     if (typeof allowAllChannels !== "boolean") {
       return createApiError(
@@ -219,6 +221,27 @@ export const PUT: APIRoute = async ({ params, locals, request }) => {
       return createApiError(
         "INVALID_REQUEST",
         "whitelistedChannelIds は配列である必要があります",
+        400,
+      );
+    }
+
+    // バリデーション: maxUrlsPerMessage（null / undefined、または 1〜MAX_URLS_PER_MESSAGE_LIMIT の整数）
+    const normalizedMaxUrls: number | null = (() => {
+      if (maxUrlsPerMessage === null || maxUrlsPerMessage === undefined) return null;
+      if (
+        !Number.isInteger(maxUrlsPerMessage) ||
+        maxUrlsPerMessage < 1 ||
+        maxUrlsPerMessage > MAX_URLS_PER_MESSAGE_LIMIT
+      ) {
+        return undefined; // sentinel: invalid
+      }
+      return maxUrlsPerMessage as number;
+    })();
+
+    if (normalizedMaxUrls === undefined) {
+      return createApiError(
+        "INVALID_MAX_URLS",
+        `maxUrlsPerMessage は 1〜${MAX_URLS_PER_MESSAGE_LIMIT} の整数、または null である必要があります`,
         400,
       );
     }
@@ -291,6 +314,7 @@ export const PUT: APIRoute = async ({ params, locals, request }) => {
           version: nextVersion,
           updatedAt,
           updatedBy: user.id,
+          maxUrlsPerMessage: normalizedMaxUrls,
         })
         .where(eq(guildConfigs.guildId, guildId))
         .run();
@@ -322,10 +346,12 @@ export const PUT: APIRoute = async ({ params, locals, request }) => {
             previous: {
               allowAllChannels: currentConfig.allowAllChannels,
               whitelistedChannelIds: previousChannelIds,
+              maxUrlsPerMessage: currentConfig.maxUrlsPerMessage ?? null,
             },
             current: {
               allowAllChannels,
               whitelistedChannelIds,
+              maxUrlsPerMessage: normalizedMaxUrls,
             },
           }),
         })
@@ -348,6 +374,7 @@ export const PUT: APIRoute = async ({ params, locals, request }) => {
       version: newVersion!,
       updatedAt: new Date().toISOString(),
       updatedBy: user.id,
+      maxUrlsPerMessage: normalizedMaxUrls,
     };
 
     try {
