@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.3.1](https://github.com/twitterrx/discord-twitter-embed-rx-dashboard/compare/dashboard-v1.3.0...dashboard-v1.3.1) (2026-05-05)
+
+
+### Bug Fixes
+
+* 初期化処理修正 ([ac82899](https://github.com/twitterrx/discord-twitter-embed-rx-dashboard/commit/ac828991d3127f04ebca528c5904ade769009f68))
+* 初期化処理修正 ([569f78c](https://github.com/twitterrx/discord-twitter-embed-rx-dashboard/commit/569f78c396c13fb817c5460902db080d66b96521))
+
 ## [1.3.0](https://github.com/twitterrx/discord-twitter-embed-rx-dashboard/compare/dashboard-v1.2.1...dashboard-v1.3.0) (2026-05-05)
 
 
