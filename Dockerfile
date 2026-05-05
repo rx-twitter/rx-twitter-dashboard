@@ -17,18 +17,19 @@ COPY packages/shared/tsconfig.json ./packages/shared/
 COPY dashboard/package.json ./dashboard/
 COPY dashboard/tsconfig.json ./dashboard/
 
-# lockfile を再生成し、依存関係をインストール（この層はpackage.jsonが変わらない限りキャッシュされる）
+# lockfile を再生成し、shared の依存関係をインストール（この層はpackage.jsonが変わらない限りキャッシュされる）
 RUN npm install --package-lock-only \
-    && npm ci --workspace=@twitterrx/shared --workspace=@twitterrx/dashboard
+    && npm ci --workspace=@twitterrx/shared
 
 # packages/shared のソースをコピーしてビルド
 COPY packages/shared ./packages/shared
 RUN npm run build --workspace=@twitterrx/shared
 
-# Dashboard のソースをコピーしてビルド
+# Dashboard のソースをコピーして依存関係インストール＆ビルド
 COPY dashboard ./dashboard
-RUN npm run db:generate --workspace=@twitterrx/dashboard && \
-    npm run build --workspace=@twitterrx/dashboard
+RUN npm install --prefix dashboard \
+    && npm run db:generate --prefix dashboard \
+    && npm run build --prefix dashboard
 
 FROM node:24-alpine AS runner
 
@@ -58,7 +59,7 @@ COPY --from=builder --chown=astro:nodejs /app/dashboard/package.json ./dashboard
 # production 依存関係のみインストール（better-sqlite3 を runner 環境で再ビルド）
 # drizzle-kit はマイグレーション実行に必要なので含める
 USER root
-RUN npm ci --workspace=@twitterrx/dashboard --include=dev --omit=optional \
+RUN npm install --prefix dashboard --include=dev --omit=optional \
     && apk del .build-deps
 USER astro
 
