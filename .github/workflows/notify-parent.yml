@@ -15,7 +15,7 @@ jobs:
           github-token: ${{ secrets.TWITTERRX_PAT }}
           script: |
             await github.rest.repos.createDispatchEvent({
-              owner: 't1nyb0x',
+              owner: 'twitterrx',
               repo: 'discord-twitter-embed-rx',
               event_type: 'dashboard-updated',
               client_payload: {
