@@ -19,7 +19,11 @@ jobs:
           scope: "@twitterrx"
 
       - name: Install dependencies
+<<<<<<< Updated upstream
         run: npm ci
+=======
+        run: npm install
+>>>>>>> Stashed changes
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -27,7 +31,7 @@ jobs:
         uses: actions/cache/save@v5
         with:
           path: node_modules
-          key: ${{ runner.os }}-node-modules-${{ hashFiles('package-lock.json') }}
+          key: ${{ runner.os }}-node-modules-${{ hashFiles('package.json') }}
 
   lint:
     runs-on: ubuntu-latest
@@ -45,7 +49,7 @@ jobs:
         uses: actions/cache/restore@v5
         with:
           path: node_modules
-          key: ${{ runner.os }}-node-modules-${{ hashFiles('package-lock.json') }}
+          key: ${{ runner.os }}-node-modules-${{ hashFiles('package.json') }}
           fail-on-cache-miss: true
 
       - name: Run OxLint
@@ -67,7 +71,7 @@ jobs:
         uses: actions/cache/restore@v5
         with:
           path: node_modules
-          key: ${{ runner.os }}-node-modules-${{ hashFiles('package-lock.json') }}
+          key: ${{ runner.os }}-node-modules-${{ hashFiles('package.json') }}
           fail-on-cache-miss: true
 
       - name: Run tests with coverage
@@ -89,7 +93,7 @@ jobs:
         uses: actions/cache/restore@v5
         with:
           path: node_modules
-          key: ${{ runner.os }}-node-modules-${{ hashFiles('package-lock.json') }}
+          key: ${{ runner.os }}-node-modules-${{ hashFiles('package.json') }}
           fail-on-cache-miss: true
 
       - name: Generate Drizzle migrations
