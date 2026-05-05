@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.3.0](https://github.com/twitterrx/discord-twitter-embed-rx-dashboard/compare/dashboard-v1.2.1...dashboard-v1.3.0) (2026-05-05)
+
+
+### Features
+
+* メッセージごとのURL展開数設定追加 ([2f34fe5](https://github.com/twitterrx/discord-twitter-embed-rx-dashboard/commit/2f34fe5ef740ee12eef6282577fed4956b3f9669))
+* メッセージごとのURL展開数設定追加 ([0f32317](https://github.com/twitterrx/discord-twitter-embed-rx-dashboard/commit/0f32317d67d04859372910e6818d7e415a054e48))
+
 ## [1.2.1](https://github.com/t1nyb0x/discord-twitter-embed-rx-dashboard/compare/dashboard-v1.2.0...dashboard-v1.2.1) (2026-04-06)
 
 
