@@ -27,6 +27,7 @@ RUN npm run build --workspace=@twitterrx/shared
 
 # Dashboard のソースをコピーして依存関係インストール＆ビルド
 COPY dashboard ./dashboard
+# hadolint ignore=DL3016
 RUN cd dashboard \
     && npm pkg set dependencies["@twitterrx/shared"]="file:../packages/shared" \
     && npm install \
@@ -61,6 +62,7 @@ COPY --from=builder --chown=astro:nodejs /app/dashboard/package.json ./dashboard
 # production 依存関係のみインストール（better-sqlite3 を runner 環境で再ビルド）
 # drizzle-kit はマイグレーション実行に必要なので含める
 USER root
+# hadolint ignore=DL3016
 RUN cd dashboard \
     && npm pkg set dependencies["@twitterrx/shared"]="file:../packages/shared" \
     && npm install --include=dev --omit=optional \
