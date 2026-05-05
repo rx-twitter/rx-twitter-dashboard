@@ -1,4 +1,4 @@
-name: CI
+name: CI-dashboard
 
 on:
   pull_request:
@@ -19,11 +19,7 @@ jobs:
           scope: "@twitterrx"
 
       - name: Install dependencies
-<<<<<<< Updated upstream
-        run: npm ci
-=======
         run: npm install
->>>>>>> Stashed changes
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
