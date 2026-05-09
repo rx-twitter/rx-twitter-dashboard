@@ -26,30 +26,23 @@ const jsonFormat = winston.format.combine(
 );
 
 // トランスポート設定
+// 本番: JSON形式1本（Docker logs で収集・解析しやすい）
+// 開発: 人間可読の色付きフォーマット1本
 const transports: winston.transport[] = [
-  // コンソール出力（色付き、人間可読）
-  new winston.transports.Console({
-    format: winston.format.combine(
-      winston.format.timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),
-      winston.format((info) => {
-        info.level = info.level.toUpperCase();
-        return info;
-      })(),
-      winston.format.colorize(),
-      consoleFormat,
-    ),
-  }),
+  process.env.NODE_ENV === "production"
+    ? new winston.transports.Console({ format: jsonFormat })
+    : new winston.transports.Console({
+        format: winston.format.combine(
+          winston.format.timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),
+          winston.format((info) => {
+            info.level = info.level.toUpperCase();
+            return info;
+          })(),
+          winston.format.colorize(),
+          consoleFormat,
+        ),
+      }),
 ];
-
-// 本番環境ではJSON形式のログもコンソールに出力（Docker logs で収集）
-if (process.env.NODE_ENV === "production") {
-  transports.push(
-    new winston.transports.Console({
-      format: jsonFormat,
-      level: "info", // 本番はinfo以上のみ構造化ログに出力
-    }),
-  );
-}
 
 // Logger インスタンス作成
 const logger = winston.createLogger({
