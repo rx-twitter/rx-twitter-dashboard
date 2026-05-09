@@ -30,7 +30,6 @@ WORKDIR /app/dashboard
 # hadolint ignore=DL3016
 RUN npm pkg set 'dependencies[@twitterrx/shared]=file:../packages/shared' \
     && npm install \
-    && npm run db:generate \
     && npm run build
 
 FROM node:24-alpine AS runner

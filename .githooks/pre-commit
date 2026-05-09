@@ -1,0 +1,15 @@
+#!/bin/sh
+# schema.ts が変更に含まれる場合、db:generate を自動実行してステージングに追加する
+
+SCHEMA_FILE="src/lib/db/schema.ts"
+
+if git diff --cached --name-only | grep -q "$SCHEMA_FILE"; then
+  echo "[pre-commit] $SCHEMA_FILE が変更されています。db:generate を実行しますわ..."
+  npm run db:generate
+  if [ $? -ne 0 ]; then
+    echo "[pre-commit] db:generate が失敗しました。コミットを中止しますわ。"
+    exit 1
+  fi
+  git add drizzle/
+  echo "[pre-commit] drizzle/ をステージングに追加しましたわ。"
+fi

@@ -26,5 +26,3 @@ data/
 *.db
 *.db-*
 
-# drizzle
-drizzle/
