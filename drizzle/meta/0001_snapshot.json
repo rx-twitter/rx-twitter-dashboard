@@ -1,8 +1,8 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "c589caa6-fd06-48ce-aa0d-f7cbebb1f7ba",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "14f25429-c9c9-48de-b8d8-a4616cef916e",
+  "prevId": "c589caa6-fd06-48ce-aa0d-f7cbebb1f7ba",
   "tables": {
     "channel_whitelist": {
       "name": "channel_whitelist",
@@ -35,8 +35,12 @@
           "name": "channel_whitelist_guild_id_guild_config_guild_id_fk",
           "tableFrom": "channel_whitelist",
           "tableTo": "guild_config",
-          "columnsFrom": ["guild_id"],
-          "columnsTo": ["guild_id"],
+          "columnsFrom": [
+            "guild_id"
+          ],
+          "columnsTo": [
+            "guild_id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -111,8 +115,12 @@
           "name": "config_audit_log_user_id_user_id_fk",
           "tableFrom": "config_audit_log",
           "tableTo": "user",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -160,6 +168,13 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
+        },
+        "max_urls_per_message": {
+          "name": "max_urls_per_message",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
         }
       },
       "indexes": {},
@@ -168,8 +183,12 @@
           "name": "guild_config_updated_by_user_id_fk",
           "tableFrom": "guild_config",
           "tableTo": "user",
-          "columnsFrom": ["updated_by"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "updated_by"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -209,8 +228,12 @@
           "name": "session_user_id_user_id_fk",
           "tableFrom": "session",
           "tableTo": "user",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -254,7 +277,9 @@
       "indexes": {
         "user_discord_id_unique": {
           "name": "user_discord_id_unique",
-          "columns": ["discord_id"],
+          "columns": [
+            "discord_id"
+          ],
           "isUnique": true
         }
       },
