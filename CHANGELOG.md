@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.3.2](https://github.com/twitterrx/discord-twitter-embed-rx-dashboard/compare/dashboard-v1.3.1...dashboard-v1.3.2) (2026-05-09)
+
+
+### Bug Fixes
+
+* migrateに使うファイルを追加 ([e9d9439](https://github.com/twitterrx/discord-twitter-embed-rx-dashboard/commit/e9d94392b4b9a689ad08f69376d675c0ab2aeca7))
+* migrate処理修正 ([2669edd](https://github.com/twitterrx/discord-twitter-embed-rx-dashboard/commit/2669edd9ec593b69282d65b2b209627240b2c052))
+* migrate処理修正 ([bf1d365](https://github.com/twitterrx/discord-twitter-embed-rx-dashboard/commit/bf1d3650478124880cb627603360e8093bb6ed4a))
+
 ## [1.3.1](https://github.com/twitterrx/discord-twitter-embed-rx-dashboard/compare/dashboard-v1.3.0...dashboard-v1.3.1) (2026-05-05)
 
 
