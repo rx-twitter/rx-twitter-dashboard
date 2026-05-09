@@ -1,1 +1,0 @@
-ALTER TABLE `guild_config` ADD COLUMN `max_urls_per_message` integer;

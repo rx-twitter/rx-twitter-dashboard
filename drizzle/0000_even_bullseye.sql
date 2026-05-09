@@ -23,7 +23,6 @@ CREATE TABLE `guild_config` (
 	`version` integer DEFAULT 1 NOT NULL,
 	`updated_at` text NOT NULL,
 	`updated_by` text NOT NULL,
-	`max_urls_per_message` integer,
 	FOREIGN KEY (`updated_by`) REFERENCES `user`(`id`) ON UPDATE no action ON DELETE no action
 );
 --> statement-breakpoint
