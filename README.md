@@ -20,7 +20,10 @@ Discord Bot（TwitterRX）のギルド設定・チャンネルホワイトリス
 
 ### 1. 依存関係のインストール
 
+`@twitterrx/shared` は GitHub Packages で公開されています。インストール前に `NODE_AUTH_TOKEN` を設定してください。
+
 ```bash
+export NODE_AUTH_TOKEN=<GitHub Personal Access Token>
 npm install
 ```
 
@@ -86,15 +89,17 @@ http://localhost:4321 でアクセスできます。
 
 ## Docker での実行
 
-このプロジェクトは workspace monorepo の一部として Docker ビルドされます。
-
 ```bash
-docker build -t twitterrx-dashboard .
+docker build \
+  --build-arg NODE_AUTH_TOKEN=<GitHub Personal Access Token> \
+  -t twitterrx-dashboard .
 docker run -p 4321:4321 \
-  -v dashboard_data:/app/dashboard/data \
+  -v dashboard_data:/app/data \
   --env-file .env \
   twitterrx-dashboard
 ```
+
+`NODE_AUTH_TOKEN` には GitHub Packages の読み取り権限（`read:packages`）を持つ Personal Access Token を指定してください。
 
 起動時に `scripts/migrate.sh` が自動実行され、データベースマイグレーションが適用されます。
 
