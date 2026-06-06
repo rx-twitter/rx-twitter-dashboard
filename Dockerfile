@@ -6,31 +6,21 @@ RUN apk add --no-cache python3 make g++
 
 WORKDIR /app
 
-# workspace のルート設定をコピー
+ARG NODE_AUTH_TOKEN
+
+# package.json をコピー（この層は package.json が変わらない限りキャッシュされる）
 COPY package.json package-lock.json ./
 
-# packages/shared の package.json をコピー
-COPY packages/shared/package.json ./packages/shared/
-COPY packages/shared/tsconfig.json ./packages/shared/
-
-# Dashboard の package.json をコピー
-COPY dashboard/package.json ./dashboard/
-COPY dashboard/tsconfig.json ./dashboard/
-
-# shared の依存関係をインストール（この層はpackage.jsonが変わらない限りキャッシュされる）
-RUN npm ci --workspace=@twitterrx/shared
-
-# packages/shared のソースをコピーしてビルド
-COPY packages/shared ./packages/shared
-RUN npm run build --workspace=@twitterrx/shared
-
-# Dashboard のソースをコピーして依存関係インストール＆ビルド
-COPY dashboard ./dashboard
-WORKDIR /app/dashboard
+# GitHub Packages 認証設定（インストール後に削除）
 # hadolint ignore=DL3016
-RUN npm pkg set 'dependencies[@twitterrx/shared]=file:../packages/shared' \
-    && npm install \
-    && npm run build
+RUN echo "@twitterrx:registry=https://npm.pkg.github.com" >> .npmrc && \
+    echo "//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}" >> .npmrc && \
+    npm ci && \
+    rm -f .npmrc
+
+# ソースをコピーしてビルド
+COPY . .
+RUN npm run build
 
 FROM node:24-alpine AS runner
 
@@ -45,49 +35,39 @@ RUN addgroup --system --gid 1001 nodejs \
 # hadolint ignore=DL3018
 RUN apk add --no-cache --virtual .build-deps python3 make g++
 
-USER astro
+ARG NODE_AUTH_TOKEN
 
-# workspace 設定をコピー
-COPY --from=builder --chown=astro:nodejs /app/package.json ./
-COPY --from=builder --chown=astro:nodejs /app/package-lock.json ./
-
-# packages/shared のビルド成果物をコピー
-COPY --from=builder --chown=astro:nodejs /app/packages ./packages
-
-# Dashboard の package.json をコピー
-COPY --from=builder --chown=astro:nodejs /app/dashboard/package.json ./dashboard/
-
-# production 依存関係のみインストール（better-sqlite3 を runner 環境で再ビルド）
-# drizzle-kit はマイグレーション実行に必要なので含める
 USER root
-WORKDIR /app/dashboard
+COPY --from=builder /app/package.json ./
+COPY --from=builder /app/package-lock.json ./
+
+# drizzle-kit はマイグレーション実行に必要なので含める
 # hadolint ignore=DL3016
-RUN npm pkg set 'dependencies[@twitterrx/shared]=file:../packages/shared' \
-    && npm install --include=dev --omit=optional \
-    && apk del .build-deps
-WORKDIR /app
+RUN echo "@twitterrx:registry=https://npm.pkg.github.com" >> .npmrc && \
+    echo "//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}" >> .npmrc && \
+    npm install --include=dev --omit=optional && \
+    rm -f .npmrc && \
+    apk del .build-deps
+
 USER astro
 
-# Dashboard のビルド成果物をコピー
-COPY --from=builder --chown=astro:nodejs /app/dashboard/dist ./dashboard/dist
+# ビルド成果物をコピー
+COPY --from=builder --chown=astro:nodejs /app/dist ./dist
 
 # マイグレーション実行スクリプト
-COPY --from=builder --chown=astro:nodejs /app/dashboard/scripts ./dashboard/scripts
+COPY --from=builder --chown=astro:nodejs /app/scripts ./scripts
 
 # Drizzle 設定とマイグレーションファイル
-COPY --from=builder --chown=astro:nodejs /app/dashboard/drizzle.config.ts ./dashboard/
-COPY --from=builder --chown=astro:nodejs /app/dashboard/drizzle ./dashboard/drizzle
+COPY --from=builder --chown=astro:nodejs /app/drizzle.config.ts ./
+COPY --from=builder --chown=astro:nodejs /app/drizzle ./drizzle
 
 # データディレクトリを作成（astro ユーザーで）
-RUN mkdir -p /app/dashboard/data
+RUN mkdir -p /app/data
 
-# 作業ディレクトリを dashboard に変更
-WORKDIR /app/dashboard
-
-VOLUME /app/dashboard/data
+VOLUME /app/data
 
 # 起動ラッパースクリプト
-COPY --from=builder --chown=astro:nodejs /app/dashboard/server-start.mjs ./
+COPY --from=builder --chown=astro:nodejs /app/server-start.mjs ./
 
 EXPOSE 4321
 

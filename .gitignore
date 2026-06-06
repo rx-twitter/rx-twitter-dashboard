@@ -17,6 +17,7 @@ pnpm-debug.log*
 # environment variables
 .env
 .env.production
+.env.app
 
 # macOS-specific files
 .DS_Store
@@ -26,3 +27,4 @@ data/
 *.db
 *.db-*
 
+compose.yml
