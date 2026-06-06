@@ -29,13 +29,29 @@ npm install
 
 ### 2. 環境変数の設定
 
-`.env` ファイルを作成します:
+環境変数ファイルは用途に応じて 2 種類に分かれています。
+
+| ファイル   | 用途                                                    | 参照元                 |
+| ---------- | ------------------------------------------------------- | ---------------------- |
+| `.env.app` | アプリシークレット（コンテナに渡す）                    | `env_file:`            |
+| `.env`     | Compose 変数展開専用（`IMAGE_TAG`, `DASHBOARD_DOMAIN`） | Compose が自動読み込み |
+
+#### ローカル開発（`npm run dev`）
 
 ```bash
-cp .env.example .env
+cp .env.app.example .env
 ```
 
-#### 必須
+#### Docker Compose
+
+```bash
+cp .env.app.example .env.app
+cp .env.compose.example .env
+```
+
+#### アプリ変数一覧（`.env.app`）
+
+**必須**
 
 | 変数名                         | 説明                                               |
 | ------------------------------ | -------------------------------------------------- |
@@ -45,14 +61,21 @@ cp .env.example .env
 | `SESSION_SECRET`               | 32 文字以上。`openssl rand -base64 32` で生成      |
 | `ENCRYPTION_SALT`              | 16 文字以上。`openssl rand -base64 32` で生成      |
 
-#### オプション
+**オプション**
 
-| 変数名                         | デフォルト値               | 説明                    |
-| ------------------------------ | -------------------------- | ----------------------- |
-| `DATABASE_URL`                 | `file:./data/dashboard.db` | SQLite データベースパス |
-| `REDIS_URL`                    | `redis://redis:6379`       | Redis 接続 URL          |
-| `ORPHAN_CONFIG_RETENTION_DAYS` | `30`                       | 孤立設定の保持日数      |
-| `AUDIT_LOG_RETENTION_DAYS`     | `90`                       | 監査ログの保持日数      |
+| 変数名                         | デフォルト値               | 説明                                           |
+| ------------------------------ | -------------------------- | ---------------------------------------------- |
+| `DATABASE_URL`                 | `file:./data/dashboard.db` | SQLite データベースパス                        |
+| `REDIS_URL`                    | `redis://redis:6379`       | Redis 接続 URL（Compose 環境では上書きされる） |
+| `ORPHAN_CONFIG_RETENTION_DAYS` | `30`                       | 孤立設定の保持日数                             |
+| `AUDIT_LOG_RETENTION_DAYS`     | `90`                       | 監査ログの保持日数                             |
+
+#### Compose 変数一覧（`.env`）
+
+| 変数名             | デフォルト値 | 説明                             |
+| ------------------ | ------------ | -------------------------------- |
+| `IMAGE_TAG`        | `latest`     | デプロイするイメージタグ         |
+| `DASHBOARD_DOMAIN` | —            | nginx-proxy が参照するドメイン名 |
 
 ### 3. データベースマイグレーション
 
@@ -89,13 +112,25 @@ http://localhost:4321 でアクセスできます。
 
 ## Docker での実行
 
+### Docker Compose（推奨）
+
+```bash
+# 環境変数ファイルを用意
+cp .env.app.example .env.app   # アプリシークレットを編集
+cp .env.compose.example .env   # IMAGE_TAG・DASHBOARD_DOMAIN を編集
+
+docker compose up -d
+```
+
+### 単体ビルド・起動
+
 ```bash
 docker build \
   --build-arg NODE_AUTH_TOKEN=<GitHub Personal Access Token> \
   -t twitterrx-dashboard .
 docker run -p 4321:4321 \
   -v dashboard_data:/app/data \
-  --env-file .env \
+  --env-file .env.app \
   twitterrx-dashboard
 ```
 
