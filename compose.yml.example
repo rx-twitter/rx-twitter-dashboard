@@ -1,0 +1,52 @@
+# =============================================================================
+# TwitterRX Dashboard 用 Docker Compose（GHCR イメージベース）
+# Bot + Redis が既に動作している環境に Dashboard を追加する参考ファイル
+# =============================================================================
+#
+# VPS 側に以下のファイルを配置してください:
+#
+#   ~/TwitterRX/
+#   ├── compose.yml               ← Bot + Redis の compose（既存）
+#   └── dashboard/
+#       └── .env                  ← Dashboard 用環境変数（OAuth2, SESSION_SECRET 等）
+#
+# 前提:
+#   - Bot + Redis が twitterrx_network に接続済みで動作していること
+#   - jwilder/nginx-proxy が別 compose で起動済みで "proxy-network" が存在すること
+#
+# 起動: docker compose -f compose.yml -f compose.yml.dashboard-example up -d
+# 更新: docker compose -f compose.yml -f compose.yml.dashboard-example pull && \
+#        docker compose -f compose.yml -f compose.yml.dashboard-example up -d --force-recreate --remove-orphans
+# =============================================================================
+
+services:
+  # Dashboard（Astro SSR）
+  dashboard:
+    container_name: TwitterRX_Dashboard
+    image: ghcr.io/twitterrx/discord-twitter-embed-rx-dashboard:${IMAGE_TAG:-latest}
+    restart: always
+    env_file:
+      - ./.env
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - LOG_DIR=/app/logs/dashboard
+      # jwilder/nginx-proxy 用
+      - VIRTUAL_HOST=${DASHBOARD_DOMAIN}
+      - VIRTUAL_PORT=4321
+    expose:
+      - "4321"
+    networks:
+      - twitterrx_network
+      - proxy-network
+    volumes:
+      - dashboard_data:/app/dashboard/data
+      - ./logs/dashboard:/app/logs
+
+networks:
+  twitterrx_network:
+    external: true
+  proxy-network:
+    external: true
+
+volumes:
+  dashboard_data:
