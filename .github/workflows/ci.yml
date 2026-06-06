@@ -8,6 +8,8 @@ permissions: {}
 
 jobs:
   setup:
+    permissions:
+      packages: read
     timeout-minutes: 15
     runs-on: ubuntu-latest
 
