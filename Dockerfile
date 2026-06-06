@@ -61,8 +61,10 @@ COPY --from=builder --chown=astro:nodejs /app/scripts ./scripts
 COPY --from=builder --chown=astro:nodejs /app/drizzle.config.ts ./
 COPY --from=builder --chown=astro:nodejs /app/drizzle ./drizzle
 
-# データディレクトリを作成（astro ユーザーで）
-RUN mkdir -p /app/data
+# データディレクトリを作成して astro ユーザーに所有権を付与（root で実行）
+USER root
+RUN mkdir -p /app/data && chown astro:nodejs /app/data
+USER astro
 
 VOLUME /app/data
 
