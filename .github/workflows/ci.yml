@@ -25,16 +25,18 @@ jobs:
           registry-url: "https://npm.pkg.github.com"
           scope: "@twitterrx"
 
-      - name: Install dependencies
-        run: npm install
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Save node_modules cache
-        uses: actions/cache/save@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+      - name: Cache node_modules
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        id: cache
         with:
           path: node_modules
-          key: ${{ runner.os }}-node-modules-${{ hashFiles('package.json') }}
+          key: ${{ runner.os }}-node-modules-${{ hashFiles('package-lock.json') }}
+
+      - name: Install dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: npm ci
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   lint:
     timeout-minutes: 15
@@ -55,7 +57,7 @@ jobs:
         uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: node_modules
-          key: ${{ runner.os }}-node-modules-${{ hashFiles('package.json') }}
+          key: ${{ runner.os }}-node-modules-${{ hashFiles('package-lock.json') }}
           fail-on-cache-miss: true
 
       - name: Run OxLint
@@ -80,7 +82,7 @@ jobs:
         uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: node_modules
-          key: ${{ runner.os }}-node-modules-${{ hashFiles('package.json') }}
+          key: ${{ runner.os }}-node-modules-${{ hashFiles('package-lock.json') }}
           fail-on-cache-miss: true
 
       - name: Run tests with coverage
@@ -105,7 +107,7 @@ jobs:
         uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: node_modules
-          key: ${{ runner.os }}-node-modules-${{ hashFiles('package.json') }}
+          key: ${{ runner.os }}-node-modules-${{ hashFiles('package-lock.json') }}
           fail-on-cache-miss: true
 
       - name: Generate Drizzle migrations
