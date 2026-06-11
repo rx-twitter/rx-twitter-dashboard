@@ -2,7 +2,7 @@ name: deploy
 
 on:
   workflow_run:
-    workflows: [Push Image]
+    workflows: [push-image]
     types:
       - completed
 
