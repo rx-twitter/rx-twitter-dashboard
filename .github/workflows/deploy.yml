@@ -12,18 +12,6 @@ jobs:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
 
     steps:
-      - name: Debug webhook URL shape
-        env:
-          WEBHOOK_URL: ${{ secrets.WEBHOOK_URL }}
-        run: |
-          python3 - <<'PY'
-          import os
-          url = os.environ["WEBHOOK_URL"]
-          print("starts with https://deploy.t1nyb0x.cloud:", url.startswith("https://deploy.t1nyb0x.cloud"))
-          print("ends with /deploy/dashboard:", url.endswith("/deploy/dashboard"))
-          print("ends with slash:", url.endswith("/"))
-          print("path tail:", url.split("deploy.t1nyb0x.cloud")[-1])
-          PY
       - name: Trigger Deploy Webhook
         env:
           WEBHOOK_URL: ${{ secrets.WEBHOOK_URL }}
