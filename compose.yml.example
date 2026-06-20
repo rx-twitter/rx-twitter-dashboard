@@ -23,7 +23,7 @@ services:
   # Dashboard（Astro SSR）
   dashboard:
     container_name: TwitterRX_Dashboard
-    image: ghcr.io/twitterrx/discord-twitter-embed-rx-dashboard:${IMAGE_TAG:-latest}
+    image: ghcr.io/rx-twitter/rx-twitter-dashboard:${IMAGE_TAG:-latest}
     restart: always
     env_file:
       - ./.env

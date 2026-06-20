@@ -23,7 +23,7 @@ jobs:
         with:
           node-version: 24.x
           registry-url: "https://npm.pkg.github.com"
-          scope: "@twitterrx"
+          scope: "@rx-twitter"
 
       - name: Cache node_modules
         uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
