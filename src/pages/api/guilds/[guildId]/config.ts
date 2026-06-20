@@ -1,7 +1,7 @@
+import { MAX_URLS_PER_MESSAGE_LIMIT } from "@rx-twitter/shared";
 import type { APIRoute } from "astro";
 import { eq } from "drizzle-orm";
 
-import { MAX_URLS_PER_MESSAGE_LIMIT } from "@twitterrx/shared";
 import { createApiError, createApiResponseWithHeaders, getAccessToken } from "@/lib/api-helpers";
 import { db } from "@/lib/db";
 import { channelWhitelist, configAuditLogs, guildConfigs } from "@/lib/db/schema";
