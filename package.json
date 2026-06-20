@@ -27,7 +27,7 @@
     "@astrojs/node": "^10.0.5",
     "@astrojs/preact": "^3.5.3",
     "arctic": "^2.0.2",
-    "astro": "^6.1.7",
+    "astro": "^6.4.8",
     "better-sqlite3": "^11.8.1",
     "drizzle-orm": "^0.45.2",
     "ioredis": "^5.4.2",
