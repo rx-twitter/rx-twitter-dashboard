@@ -4,5 +4,10 @@
   "extends": ["config:best-practices"],
   "minimumReleaseAge": "7 days",
   "postUpdateOptions": ["npmDedupe"],
-  "npmrc": "@rx-twitter:registry=https://npm.pkg.github.com/"
+  "hostRules": [
+    {
+      "matchHost": "github.com",
+      "token": "{{ secrets.GITHUB_TOKEN }}"
+    }
+  ]
 }
