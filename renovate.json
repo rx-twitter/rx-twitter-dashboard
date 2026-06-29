@@ -1,0 +1,8 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "baseBranchPatterns": ["develop"],
+  "extends": ["config:best-practices"],
+  "minimumReleaseAge": "7 days",
+  "postUpdateOptions": ["npmDedupe"],
+  "npmrc": "@rx-twitter:registry=https://npm.pkg.github.com/"
+}
