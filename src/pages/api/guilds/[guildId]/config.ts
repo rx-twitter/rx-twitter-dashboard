@@ -304,58 +304,56 @@ export const PUT: APIRoute = async ({ params, locals, request }) => {
     const updatedAt = new Date().toISOString();
     const nextVersion = currentConfig.version + 1;
 
-    // トランザクション処理
     let newVersion: number;
     try {
-      // P0: 楽観的ロックを UPDATE WHERE version で担保
-      db.update(guildConfigs)
-        .set({
-          allowAllChannels,
-          version: nextVersion,
-          updatedAt,
-          updatedBy: user.id,
-          maxUrlsPerMessage: normalizedMaxUrls,
-        })
-        .where(eq(guildConfigs.guildId, guildId))
-        .run();
-
-      // 既存のホワイトリストを削除
-      db.delete(channelWhitelist).where(eq(channelWhitelist.guildId, guildId)).run();
-
-      // 新しいホワイトリストを挿入
-      if (whitelistedChannelIds.length > 0) {
-        db.insert(channelWhitelist)
-          .values(
-            whitelistedChannelIds.map((channelId: string) => ({
-              guildId,
-              channelId,
-            })),
-          )
+      db.transaction((tx) => {
+        // P0: 楽観的ロックを UPDATE WHERE version で担保
+        tx.update(guildConfigs)
+          .set({
+            allowAllChannels,
+            version: nextVersion,
+            updatedAt,
+            updatedBy: user.id,
+            maxUrlsPerMessage: normalizedMaxUrls,
+          })
+          .where(eq(guildConfigs.guildId, guildId))
           .run();
-      }
 
-      // 監査ログ記録
-      db.insert(configAuditLogs)
-        .values({
-          guildId,
-          userId: user.id,
-          action: "update",
-          oldVersion: currentConfig.version,
-          newVersion: nextVersion,
-          changes: JSON.stringify({
-            previous: {
-              allowAllChannels: currentConfig.allowAllChannels,
-              whitelistedChannelIds: previousChannelIds,
-              maxUrlsPerMessage: currentConfig.maxUrlsPerMessage ?? null,
-            },
-            current: {
-              allowAllChannels,
-              whitelistedChannelIds,
-              maxUrlsPerMessage: normalizedMaxUrls,
-            },
-          }),
-        })
-        .run();
+        tx.delete(channelWhitelist).where(eq(channelWhitelist.guildId, guildId)).run();
+
+        if (whitelistedChannelIds.length > 0) {
+          tx.insert(channelWhitelist)
+            .values(
+              whitelistedChannelIds.map((channelId: string) => ({
+                guildId,
+                channelId,
+              })),
+            )
+            .run();
+        }
+
+        tx.insert(configAuditLogs)
+          .values({
+            guildId,
+            userId: user.id,
+            action: "update",
+            oldVersion: currentConfig.version,
+            newVersion: nextVersion,
+            changes: JSON.stringify({
+              previous: {
+                allowAllChannels: currentConfig.allowAllChannels,
+                whitelistedChannelIds: previousChannelIds,
+                maxUrlsPerMessage: currentConfig.maxUrlsPerMessage ?? null,
+              },
+              current: {
+                allowAllChannels,
+                whitelistedChannelIds,
+                maxUrlsPerMessage: normalizedMaxUrls,
+              },
+            }),
+          })
+          .run();
+      });
 
       newVersion = nextVersion;
     } catch (txErr) {
