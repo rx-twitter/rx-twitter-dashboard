@@ -550,9 +550,9 @@ Bot 側の実装は [DASHBOARD_BOT_IMPLEMENTATION.md](DASHBOARD_BOT_IMPLEMENTATI
 ```typescript
 // src/lib/auth.ts
 
-import { Lucia } from "lucia";
 import { RedisAdapter } from "@lucia-auth/adapter-redis";
 import Redis from "ioredis";
+import { Lucia } from "lucia";
 
 const redis = new Redis(process.env.REDIS_URL);
 

@@ -103,6 +103,7 @@ Node.js のデフォルトヒープサイズ（512MB〜2GB）に対して十分�
 // src/infrastructure/db/RedisChannelConfigRepository.ts
 
 import Redis from "ioredis";
+
 import {
   IChannelConfigRepository,
   ConfigResult,
@@ -685,8 +686,8 @@ setInterval(async () => {
 ```typescript
 // src/index.ts（変更部分のみ）
 
-import { RedisChannelConfigRepository } from "./infrastructure/db/RedisChannelConfigRepository";
 import { ChannelConfigService } from "./core/services/ChannelConfigService";
+import { RedisChannelConfigRepository } from "./infrastructure/db/RedisChannelConfigRepository";
 
 // Infrastructure層
 const channelConfigRepository = new RedisChannelConfigRepository(redisUrl);

@@ -530,13 +530,14 @@ function isChannelAllowed(guildId: string, channelId: string): boolean {
 > ```
 >
 > **audit_log_deletions テーブル**:
-> | カラム | 型 | 説明 |
-> |--------|------|------|
-> | id | INTEGER | PRIMARY KEY AUTOINCREMENT |
-> | target_user_id | TEXT | 削除対象のユーザー ID |
-> | deleted_count | INTEGER | 削除した件数 |
-> | operator_id | TEXT | 操作を実行した運用者 ID |
-> | deleted_at | TEXT | ISO 8601 形式 |
+>
+> | カラム         | 型      | 説明                      |
+> | -------------- | ------- | ------------------------- |
+> | id             | INTEGER | PRIMARY KEY AUTOINCREMENT |
+> | target_user_id | TEXT    | 削除対象のユーザー ID     |
+> | deleted_count  | INTEGER | 削除した件数              |
+> | operator_id    | TEXT    | 操作を実行した運用者 ID   |
+> | deleted_at     | TEXT    | ISO 8601 形式             |
 >
 > **バックアップ手順への追記**:
 >
@@ -589,11 +590,12 @@ export const configAuditLogs = sqliteTable("config_audit_logs", {
 > trigger / description などのメタ情報は `action` カラムで表現する。
 >
 > **action カラムの値**（トリガー情報はここで表現）:
-> | action | 説明 |
-> |--------|------|
-> | `update` | ユーザーによる通常の設定変更 |
-> | `create_default` | デフォルト設定の作成 |
-> | `manual_initialize` | ユーザー明示の初期化 |
+>
+> | action               | 説明                                     |
+> | -------------------- | ---------------------------------------- |
+> | `update`             | ユーザーによる通常の設定変更             |
+> | `create_default`     | デフォルト設定の作成                     |
+> | `manual_initialize`  | ユーザー明示の初期化                     |
 > | `auto_create_on_get` | GET による自動作成（非推奨、後方互換用） |
 >
 > **許可するフィールド**（これ以外は含めない）:
@@ -2429,8 +2431,9 @@ async function createDefaultConfig(guildId: string, userId: string): Promise<Gui
 > ```
 >
 > **キーパターン追加**:
-> | キーパターン | 型 | TTL | 用途 |
-> |-------------|------|-----|------|
+>
+> | キーパターン                           | 型           | TTL  | 用途                       |
+> | -------------------------------------- | ------------ | ---- | -------------------------- |
 > | `app:guild:{guildId}:channels:refresh` | String (`1`) | 60秒 | チャンネル再取得リクエスト |
 
 **チャンネル数の制限**:
@@ -3190,9 +3193,9 @@ async function getAvailableChannels(guildId: string): Promise<ChannelInfo[]> {
 ```typescript
 // src/lib/auth.ts
 
-import { Lucia } from "lucia";
 import { RedisAdapter } from "@lucia-auth/adapter-redis";
 import Redis from "ioredis";
+import { Lucia } from "lucia";
 
 const redis = new Redis(process.env.REDIS_URL);
 
@@ -3681,8 +3684,8 @@ client.on("ready", async () => {
 ```typescript
 // src/index.ts（変更部分のみ）
 
-import { RedisChannelConfigRepository } from "./infrastructure/db/RedisChannelConfigRepository";
 import { ChannelConfigService } from "./core/services/ChannelConfigService";
+import { RedisChannelConfigRepository } from "./infrastructure/db/RedisChannelConfigRepository";
 
 // Infrastructure層
 const channelConfigRepository = new RedisChannelConfigRepository(redisUrl);
