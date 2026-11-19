@@ -2063,7 +2063,7 @@ if (message.guildId) {
 ```yaml
 services:
   twitter-rx:
-    image: ghcr.io/twitterrx/discord-twitter-embed-rx:latest
+    image: ghcr.io/rx-twitter/rx-twitter:latest
     env_file: .env
     depends_on:
       redis:

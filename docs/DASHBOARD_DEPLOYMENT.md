@@ -40,7 +40,7 @@
 services:
   twitter-rx:
     container_name: TwitterEmbedRX
-    image: ghcr.io/twitterrx/discord-twitter-embed-rx:latest
+    image: ghcr.io/rx-twitter/rx-twitter:latest
     restart: unless-stopped
     env_file: .env
     depends_on:
