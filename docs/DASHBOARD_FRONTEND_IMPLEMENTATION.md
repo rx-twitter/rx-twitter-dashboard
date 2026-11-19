@@ -65,12 +65,12 @@ dashboard/
 
 ## ページ一覧
 
-| パス | レンダリング | 認証 | 説明 |
-|------|-------------|------|------|
-| `/` | SSG | 不要 | ランディングページ |
-| `/login` | SSG | 不要 | ログインボタン表示 |
-| `/dashboard` | SSR | 必要 | ギルド一覧表示 |
-| `/dashboard/{guildId}` | SSR | 必要 + 権限 | チャンネル設定 |
+| パス                   | レンダリング | 認証        | 説明               |
+| ---------------------- | ------------ | ----------- | ------------------ |
+| `/`                    | SSG          | 不要        | ランディングページ |
+| `/login`               | SSG          | 不要        | ログインボタン表示 |
+| `/dashboard`           | SSR          | 必要        | ギルド一覧表示     |
+| `/dashboard/{guildId}` | SSR          | 必要 + 権限 | チャンネル設定     |
 
 ---
 
@@ -83,7 +83,7 @@ dashboard/
 ```tsx
 // dashboard/src/components/ChannelSelector.tsx
 
-import { useState } from 'preact/hooks';
+import { useState } from "preact/hooks";
 
 interface Channel {
   id: string;
@@ -100,10 +100,10 @@ interface Props {
   csrfToken: string;
 }
 
-export default function ChannelSelector({ 
-  guildId, 
-  channels, 
-  initialWhitelist, 
+export default function ChannelSelector({
+  guildId,
+  channels,
+  initialWhitelist,
   initialAllowAll,
   initialVersion,
   csrfToken,
@@ -113,64 +113,64 @@ export default function ChannelSelector({
   const [version, setVersion] = useState(initialVersion);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
 
   // クライアントサイド検索（P0対応）
-  const filteredChannels = channels.filter(ch => 
-    ch.name.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredChannels = channels.filter((ch) =>
+    ch.name.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   const handleSave = async () => {
     setSaving(true);
     setError(null);
-    
+
     try {
       const response = await fetch(`/api/guilds/${guildId}/config`, {
-        method: 'PUT',
+        method: "PUT",
         headers: {
-          'Content-Type': 'application/json',
-          'X-CSRF-Token': csrfToken,
-          'If-Match': `"${version}"`,
+          "Content-Type": "application/json",
+          "X-CSRF-Token": csrfToken,
+          "If-Match": `"${version}"`,
         },
         body: JSON.stringify({
           allowAllChannels: allowAll,
           whitelist: Array.from(whitelist),
         }),
       });
-      
+
       if (response.status === 409) {
-        setError('設定が他のユーザーによって更新されました。ページを再読み込みしてください。');
+        setError("設定が他のユーザーによって更新されました。ページを再読み込みしてください。");
         return;
       }
-      
+
       if (!response.ok) {
         // P1対応: content-type を確認してから JSON パース
-        const contentType = response.headers.get('content-type') || '';
-        if (!contentType.includes('application/json')) {
-          setError('予期しないエラーが発生しました。');
+        const contentType = response.headers.get("content-type") || "";
+        if (!contentType.includes("application/json")) {
+          setError("予期しないエラーが発生しました。");
           return;
         }
-        
+
         const data = await response.json();
-        
+
         // 503 は結果整合モデルで別途処理
         if (response.status === 503) {
           await handleSaveError(response, guildId, data);
           return;
         }
-        
-        setError(data.error?.message || '保存に失敗しました。再度お試しください。');
+
+        setError(data.error?.message || "保存に失敗しました。再度お試しください。");
         return;
       }
-      
+
       const data = await response.json();
       setVersion(data.version); // 新しい version を保持
       setError(null);
-      
+
       // 成功メッセージを短時間表示
       showSuccessMessage();
     } catch (err) {
-      setError('ネットワークエラーが発生しました');
+      setError("ネットワークエラーが発生しました");
     } finally {
       setSaving(false);
     }
@@ -184,10 +184,12 @@ export default function ChannelSelector({
       setVersion(latestConfig.version);
       setWhitelist(new Set(latestConfig.whitelist));
       setAllowAll(latestConfig.allowAllChannels);
-      
-      setError('保存は完了している可能性があります。最新の状態を表示しました。再読み込みして確認してください。');
+
+      setError(
+        "保存は完了している可能性があります。最新の状態を表示しました。再読み込みして確認してください。",
+      );
     } else {
-      setError(errorData.error?.message || '設定の同期に失敗しました。');
+      setError(errorData.error?.message || "設定の同期に失敗しました。");
     }
   };
 
@@ -214,7 +216,7 @@ export default function ChannelSelector({
   };
 
   const selectAll = () => {
-    setWhitelist(new Set(filteredChannels.map(c => c.id)));
+    setWhitelist(new Set(filteredChannels.map((c) => c.id)));
   };
 
   const deselectAll = () => {
@@ -222,28 +224,28 @@ export default function ChannelSelector({
   };
 
   // チャンネル ID 直接追加（P0対応）
-  const [directChannelId, setDirectChannelId] = useState('');
-  
+  const [directChannelId, setDirectChannelId] = useState("");
+
   const handleAddDirectChannel = () => {
     if (/^\d{17,19}$/.test(directChannelId)) {
       setWhitelist(new Set([...whitelist, directChannelId]));
-      setDirectChannelId('');
+      setDirectChannelId("");
       setError(null);
     } else {
-      setError('チャンネル ID は 17〜19 桁の数字です');
+      setError("チャンネル ID は 17〜19 桁の数字です");
     }
   };
 
   return (
     <div class="channel-selector">
       {error && <div class="error-message">{error}</div>}
-      
+
       <div class="toggle-section">
         <label>
-          <input 
-            type="checkbox" 
-            checked={allowAll} 
-            onChange={(e) => setAllowAll(e.currentTarget.checked)} 
+          <input
+            type="checkbox"
+            checked={allowAll}
+            onChange={(e) => setAllowAll(e.currentTarget.checked)}
           />
           全チャンネルで応答する
         </label>
@@ -269,8 +271,8 @@ export default function ChannelSelector({
                   <button onClick={selectAll}>全選択</button>
                   <button onClick={deselectAll}>全解除</button>
                 </div>
-                
-                {filteredChannels.map(channel => (
+
+                {filteredChannels.map((channel) => (
                   <label key={channel.id} class="channel-item">
                     <input
                       type="checkbox"
@@ -280,7 +282,7 @@ export default function ChannelSelector({
                     # {channel.name}
                   </label>
                 ))}
-                
+
                 {filteredChannels.length === 0 && (
                   <p class="no-results">検索条件に一致するチャンネルがありません</p>
                 )}
@@ -297,10 +299,7 @@ export default function ChannelSelector({
                     onChange={(e) => setDirectChannelId(e.currentTarget.value)}
                     className="direct-add-input"
                   />
-                  <button 
-                    onClick={handleAddDirectChannel}
-                    className="direct-add-button"
-                  >
+                  <button onClick={handleAddDirectChannel} className="direct-add-button">
                     追加
                   </button>
                 </div>
@@ -310,13 +309,10 @@ export default function ChannelSelector({
             <div class="no-channels-warning">
               <p class="no-channels">Bot がチャンネル情報を取得中です。しばらくお待ちください。</p>
               <p class="no-channels-hint">
-                ⚠️ この状態が続く場合、Bot がオフラインの可能性があります。
-                Bot が起動しているか確認してください。
+                ⚠️ この状態が続く場合、Bot がオフラインの可能性があります。 Bot
+                が起動しているか確認してください。
               </p>
-              <button 
-                onClick={() => handleRefreshChannels()}
-                className="btn-refresh"
-              >
+              <button onClick={() => handleRefreshChannels()} className="btn-refresh">
                 🔄 チャンネル一覧を再取得
               </button>
             </div>
@@ -324,14 +320,14 @@ export default function ChannelSelector({
         </>
       )}
 
-      <button 
-        class="save-button" 
-        onClick={handleSave} 
+      <button
+        class="save-button"
+        onClick={handleSave}
         disabled={saving || (!allowAll && whitelist.size === 0)}
       >
-        {saving ? '保存中...' : '設定を保存'}
+        {saving ? "保存中..." : "設定を保存"}
       </button>
-      
+
       {!allowAll && whitelist.size === 0 && (
         <p class="validation-hint">少なくとも1つのチャンネルを選択してください</p>
       )}
@@ -347,7 +343,7 @@ export default function ChannelSelector({
 ```tsx
 // dashboard/src/components/SessionExpiryWarning.tsx
 
-import { useState, useEffect } from 'preact/hooks';
+import { useState, useEffect } from "preact/hooks";
 
 interface Props {
   expiresAt: number;
@@ -355,20 +351,20 @@ interface Props {
 
 export default function SessionExpiryWarning({ expiresAt }: Props) {
   const [now, setNow] = useState(Date.now());
-  
+
   // 1分ごとに更新
   useEffect(() => {
     const interval = setInterval(() => {
       setNow(Date.now());
     }, 60 * 1000);
-    
+
     return () => clearInterval(interval);
   }, []);
-  
+
   const remaining = expiresAt - now;
   const remainingHours = Math.floor(remaining / (1000 * 60 * 60));
   const remainingDays = Math.floor(remaining / (1000 * 60 * 60 * 24));
-  
+
   // 24時間以内なら警告
   if (remaining < 24 * 60 * 60 * 1000 && remaining > 0) {
     return (
@@ -380,16 +376,12 @@ export default function SessionExpiryWarning({ expiresAt }: Props) {
       </div>
     );
   }
-  
+
   // 7日以内なら表示（情報提供）
   if (remaining > 0) {
-    return (
-      <p className="session-info">
-        セッション有効期限: {remainingDays} 日後
-      </p>
-    );
+    return <p className="session-info">セッション有効期限: {remainingDays} 日後</p>;
   }
-  
+
   return null;
 }
 ```
@@ -420,22 +412,20 @@ export function SessionExpiredBanner() {
 ```tsx
 export function BotOfflineError({ hint }: { hint?: string }) {
   const [retrying, setRetrying] = useState(false);
-  
+
   const handleRetry = async () => {
     setRetrying(true);
-    await new Promise(r => setTimeout(r, 3000));
+    await new Promise((r) => setTimeout(r, 3000));
     window.location.reload();
   };
-  
+
   return (
     <div className="error-banner recoverable">
       <p>Bot がこのサーバーに参加していないか、オフラインの可能性があります。</p>
-      <p className="startup-notice">
-        ⏳ Bot 起動直後の場合、数秒後に再試行してください。
-      </p>
+      <p className="startup-notice">⏳ Bot 起動直後の場合、数秒後に再試行してください。</p>
       {hint && <p className="hint">{hint}</p>}
       <button onClick={handleRetry} disabled={retrying}>
-        {retrying ? '確認中...' : '🔄 数秒後に再試行'}
+        {retrying ? "確認中..." : "🔄 数秒後に再試行"}
       </button>
     </div>
   );
@@ -447,24 +437,24 @@ export function BotOfflineError({ hint }: { hint?: string }) {
 ```tsx
 export function ConfigNotFoundView({ guildId }: { guildId: string }) {
   const [initializing, setInitializing] = useState(false);
-  
+
   const handleInitialize = async () => {
     setInitializing(true);
     try {
-      await fetch(`/api/guilds/${guildId}/config:initialize`, { method: 'POST' });
+      await fetch(`/api/guilds/${guildId}/config:initialize`, { method: "POST" });
       window.location.reload();
     } finally {
       setInitializing(false);
     }
   };
-  
+
   return (
     <div className="config-not-found">
       <h2>設定が初期化されていません</h2>
       <p>このサーバーの設定はまだ作成されていません。</p>
       <p>「初期化」ボタンを押して設定を作成してください。</p>
       <button onClick={handleInitialize} disabled={initializing}>
-        {initializing ? '初期化中...' : '⚙️ 設定を初期化'}
+        {initializing ? "初期化中..." : "⚙️ 設定を初期化"}
       </button>
     </div>
   );
@@ -476,25 +466,24 @@ export function ConfigNotFoundView({ guildId }: { guildId: string }) {
 ```tsx
 export function HealthStatusBanner() {
   const { data: health } = useHealthCheck();
-  
-  if (health?.redis === 'down') {
+
+  if (health?.redis === "down") {
     return (
       <div className="banner banner-error">
-        ⚠️ Redis に接続できません。Bot は安全側停止モードで動作中です。
-        設定変更は Redis 復旧後に反映されます。
+        ⚠️ Redis に接続できません。Bot は安全側停止モードで動作中です。 設定変更は Redis
+        復旧後に反映されます。
       </div>
     );
   }
-  
-  if (health?.subscription === 'disconnected') {
+
+  if (health?.subscription === "disconnected") {
     return (
       <div className="banner banner-warning">
-        ⚡ リアルタイム同期が一時的に無効です。
-        設定変更の反映に最大30秒かかる場合があります。
+        ⚡ リアルタイム同期が一時的に無効です。 設定変更の反映に最大30秒かかる場合があります。
       </div>
     );
   }
-  
+
   return null;
 }
 ```
@@ -577,7 +566,7 @@ export function HealthStatusBanner() {
 }
 
 .save-button {
-  background: #5865F2;
+  background: #5865f2;
   color: white;
   padding: 0.75rem 1.5rem;
   border: none;
@@ -599,7 +588,7 @@ export function HealthStatusBanner() {
 }
 
 .btn-refresh {
-  background: #43B581;
+  background: #43b581;
   color: white;
   padding: 0.5rem 1rem;
   border: none;

@@ -33,8 +33,8 @@
 // ★ P1対応: 全 API レスポンスに共通ヘッダーを付与
 export function apiMiddleware({ request }: { request: Request }): Response | undefined {
   // API エンドポイントのみ対象
-  if (!request.url.includes('/api/')) return;
-  
+  if (!request.url.includes("/api/")) return;
+
   return undefined; // 後続処理を継続
 }
 
@@ -43,9 +43,9 @@ export function createApiResponse(body: unknown, status: number = 200): Response
   return new Response(JSON.stringify(body), {
     status,
     headers: {
-      'Content-Type': 'application/json',
-      'Cache-Control': 'no-store, no-cache, must-revalidate', // ★ 全 API でキャッシュ禁止
-      'X-Content-Type-Options': 'nosniff',
+      "Content-Type": "application/json",
+      "Cache-Control": "no-store, no-cache, must-revalidate", // ★ 全 API でキャッシュ禁止
+      "X-Content-Type-Options": "nosniff",
     },
   });
 }
@@ -55,9 +55,9 @@ export function createApiError(error: ApiError, status: number): Response {
   return new Response(JSON.stringify({ error }), {
     status,
     headers: {
-      'Content-Type': 'application/json',
-      'Cache-Control': 'no-store, no-cache, must-revalidate', // ★ エラーもキャッシュ禁止
-      'X-Content-Type-Options': 'nosniff',
+      "Content-Type": "application/json",
+      "Cache-Control": "no-store, no-cache, must-revalidate", // ★ エラーもキャッシュ禁止
+      "X-Content-Type-Options": "nosniff",
     },
   });
 }
@@ -84,21 +84,21 @@ export function createApiError(error: ApiError, status: number): Response {
 export async function POST({ params, locals }) {
   const { guildId } = params;
   const session = locals.session;
-  
+
   // 権限チェック
   await validateGuildAccess(guildId, session);
-  
+
   // 既に存在する場合はエラー
   const existing = await getConfig(guildId);
   if (existing) {
-    throw new ConflictError({ code: 'CONFIG_ALREADY_EXISTS' });
+    throw new ConflictError({ code: "CONFIG_ALREADY_EXISTS" });
   }
-  
+
   // デフォルト設定を作成（監査ログにはユーザー明示の初期化として記録）
-  const config = await createDefaultConfig(guildId, session.userId, { 
-    trigger: 'manual_initialize' 
+  const config = await createDefaultConfig(guildId, session.userId, {
+    trigger: "manual_initialize",
   });
-  
+
   return new Response(JSON.stringify({ success: true, config }), { status: 201 });
 }
 ```
@@ -108,24 +108,24 @@ export async function POST({ params, locals }) {
 ```tsx
 function ConfigNotFoundView({ guildId }: { guildId: string }) {
   const [initializing, setInitializing] = useState(false);
-  
+
   const handleInitialize = async () => {
     setInitializing(true);
     try {
-      await fetch(`/api/guilds/${guildId}/config:initialize`, { method: 'POST' });
+      await fetch(`/api/guilds/${guildId}/config:initialize`, { method: "POST" });
       window.location.reload();
     } finally {
       setInitializing(false);
     }
   };
-  
+
   return (
     <div className="config-not-found">
       <h2>設定が初期化されていません</h2>
       <p>このサーバーの設定はまだ作成されていません。</p>
       <p>「初期化」ボタンを押して設定を作成してください。</p>
       <button onClick={handleInitialize} disabled={initializing}>
-        {initializing ? '初期化中...' : '⚙️ 設定を初期化'}
+        {initializing ? "初期化中..." : "⚙️ 設定を初期化"}
       </button>
     </div>
   );
@@ -136,22 +136,24 @@ function ConfigNotFoundView({ guildId }: { guildId: string }) {
 
 既存ユーザーのために、従来の GET 副作用動作をオプトインで有効化できます。
 
-| 環境変数 | デフォルト | 説明 |
-|----------|-----------|------|
-| `AUTO_CREATE_CONFIG_ON_GET` | `false` | `true` で GET 副作用を有効化（非推奨） |
+| 環境変数                    | デフォルト | 説明                                   |
+| --------------------------- | ---------- | -------------------------------------- |
+| `AUTO_CREATE_CONFIG_ON_GET` | `false`    | `true` で GET 副作用を有効化（非推奨） |
 
 ```typescript
-const AUTO_CREATE_CONFIG = process.env.AUTO_CREATE_CONFIG_ON_GET === 'true';
+const AUTO_CREATE_CONFIG = process.env.AUTO_CREATE_CONFIG_ON_GET === "true";
 
 if (!config) {
   if (AUTO_CREATE_CONFIG) {
     // 非推奨: 従来の後方互換用
-    console.warn('[Config] AUTO_CREATE_CONFIG_ON_GET is deprecated');
-    config = await createDefaultConfig(guildId, sessionData.userId, { trigger: 'auto_create_on_get' });
+    console.warn("[Config] AUTO_CREATE_CONFIG_ON_GET is deprecated");
+    config = await createDefaultConfig(guildId, sessionData.userId, {
+      trigger: "auto_create_on_get",
+    });
   } else {
     throw new NotFoundError({
-      code: 'CONFIG_NOT_FOUND',
-      message: '設定がまだ作成されていません。設定を初期化してください。',
+      code: "CONFIG_NOT_FOUND",
+      message: "設定がまだ作成されていません。設定を初期化してください。",
     });
   }
 }
@@ -174,16 +176,16 @@ if (!config) {
 
 ### 共通エラーコード
 
-| HTTP | コード | 説明 |
-|------|--------|------|
-| 400 | `VALIDATION_ERROR` | リクエストの検証エラー |
-| 401 | `UNAUTHORIZED` | 未認証 |
-| 403 | `FORBIDDEN` | 権限なし |
-| 404 | `NOT_FOUND` | リソースが見つからない |
-| 404 | `BOT_NOT_JOINED_OR_OFFLINE` | Bot 未参加 or オフライン（復旧可能性あり） |
-| 409 | `CONFLICT` | 競合（楽観的ロック失敗） |
-| 429 | `RATE_LIMITED` | レート制限超過 |
-| 503 | `SERVICE_UNAVAILABLE` | Redis 障害など一時的なエラー |
+| HTTP | コード                      | 説明                                       |
+| ---- | --------------------------- | ------------------------------------------ |
+| 400  | `VALIDATION_ERROR`          | リクエストの検証エラー                     |
+| 401  | `UNAUTHORIZED`              | 未認証                                     |
+| 403  | `FORBIDDEN`                 | 権限なし                                   |
+| 404  | `NOT_FOUND`                 | リソースが見つからない                     |
+| 404  | `BOT_NOT_JOINED_OR_OFFLINE` | Bot 未参加 or オフライン（復旧可能性あり） |
+| 409  | `CONFLICT`                  | 競合（楽観的ロック失敗）                   |
+| 429  | `RATE_LIMITED`              | レート制限超過                             |
+| 503  | `SERVICE_UNAVAILABLE`       | Redis 障害など一時的なエラー               |
 
 ### BOT_NOT_JOINED_OR_OFFLINE エラーの処理
 
@@ -192,10 +194,10 @@ if (!config) {
 ```typescript
 // ★ 矛盾解消: recoverable フラグを追加
 throw new NotFoundError({
-  code: 'BOT_NOT_JOINED_OR_OFFLINE',
-  message: 'Bot がこのギルドに参加していないか、Bot がオフラインの可能性があります',
-  recoverable: true,  // ★ 追加: フロントでのリトライ判定に使用
-  hint: 'Bot が起動しているか確認してください。起動直後の場合は数秒お待ちください。'
+  code: "BOT_NOT_JOINED_OR_OFFLINE",
+  message: "Bot がこのギルドに参加していないか、Bot がオフラインの可能性があります",
+  recoverable: true, // ★ 追加: フロントでのリトライ判定に使用
+  hint: "Bot が起動しているか確認してください。起動直後の場合は数秒お待ちください。",
 });
 ```
 
@@ -205,15 +207,15 @@ throw new NotFoundError({
 if (response.status === 404) {
   // ★ P1対応: content-type を確認してから JSON パース
   // SSR ルーティングミスや nginx エラーページで HTML が返る場合がある
-  const contentType = response.headers.get('content-type') || '';
-  if (!contentType.includes('application/json')) {
+  const contentType = response.headers.get("content-type") || "";
+  if (!contentType.includes("application/json")) {
     // JSON ではない 404（SSR ルーティングエラー等）
     showGenericNotFoundError();
     return;
   }
-  
+
   const data = await response.json();
-  if (data.error?.code === 'BOT_NOT_JOINED_OR_OFFLINE') {
+  if (data.error?.code === "BOT_NOT_JOINED_OR_OFFLINE") {
     // ★ 復旧可能性があるエラー → リトライ導線を表示
     showRecoverableError(data.error);
   } else {
@@ -228,24 +230,22 @@ if (response.status === 404) {
 ```tsx
 function BotOfflineError({ hint }: { hint?: string }) {
   const [retrying, setRetrying] = useState(false);
-  
+
   const handleRetry = async () => {
     setRetrying(true);
     // 数秒待ってからリトライ
-    await new Promise(r => setTimeout(r, 3000));
+    await new Promise((r) => setTimeout(r, 3000));
     window.location.reload();
   };
-  
+
   return (
     <div className="error-banner recoverable">
       <p>Bot がこのサーバーに参加していないか、オフラインの可能性があります。</p>
       {/* ★ P0対応: Bot 起動直後の問い合わせ削減のための文言 */}
-      <p className="startup-notice">
-        ⏳ Bot 起動直後の場合、数秒後に再試行してください。
-      </p>
+      <p className="startup-notice">⏳ Bot 起動直後の場合、数秒後に再試行してください。</p>
       {hint && <p className="hint">{hint}</p>}
       <button onClick={handleRetry} disabled={retrying}>
-        {retrying ? '確認中...' : '🔄 数秒後に再試行'}
+        {retrying ? "確認中..." : "🔄 数秒後に再試行"}
       </button>
     </div>
   );
@@ -258,11 +258,11 @@ function BotOfflineError({ hint }: { hint?: string }) {
 
 ### レート制限設定
 
-| エンドポイント | 制限 | 単位 |
-|---------------|------|------|
+| エンドポイント                     | 制限 | 単位           |
+| ---------------------------------- | ---- | -------------- |
 | `PUT /api/guilds/{guildId}/config` | 10回 | 1分 / ユーザー |
-| `GET /api/guilds` | 30回 | 1分 / ユーザー |
-| `POST /api/auth/*` | 5回 | 1分 / IP |
+| `GET /api/guilds`                  | 30回 | 1分 / ユーザー |
+| `POST /api/auth/*`                 | 5回  | 1分 / IP       |
 
 ### Lua スクリプトによる原子的実装（P0対応）
 
@@ -281,29 +281,29 @@ const RATE_LIMIT_SCRIPT = `
   local limit = tonumber(ARGV[3])
   local windowSeconds = tonumber(ARGV[4])
   local member = ARGV[5]
-  
+
   -- 古いエントリを削除
   redis.call('ZREMRANGEBYSCORE', key, '-inf', windowStart)
-  
+
   -- 現在のカウント
   local count = redis.call('ZCARD', key)
-  
+
   -- ★ P1対応: resetAt の計算を統一（最古エントリのスコア + window）
   local oldest = redis.call('ZRANGE', key, 0, 0, 'WITHSCORES')
   local resetAt = now + (windowSeconds * 1000)
   if #oldest >= 2 then
     resetAt = tonumber(oldest[2]) + (windowSeconds * 1000)
   end
-  
+
   if count >= limit then
     -- 制限超過
     return { 0, 0, resetAt }  -- allowed=false
   end
-  
+
   -- リクエストを記録
   redis.call('ZADD', key, now, member)
   redis.call('EXPIRE', key, windowSeconds)
-  
+
   -- ★ P1対応: allowed 時も resetAt を統一して返す
   return { 1, limit - count - 1, resetAt }  -- allowed=true
 `;
@@ -312,30 +312,30 @@ const RATE_LIMIT_SCRIPT = `
 ### レート制限チェック実装
 
 ```typescript
-import { randomUUID } from 'crypto';
+import { randomUUID } from "crypto";
 
 // Redis を使用したレート制限（Lua スクリプトで原子的に実行）
 async function checkRateLimit(
-  key: string,  // 例: 'ratelimit:user:{userId}:PUT:/api/guilds'
+  key: string, // 例: 'ratelimit:user:{userId}:PUT:/api/guilds'
   limit: number,
-  windowSeconds: number
+  windowSeconds: number,
 ): Promise<{ allowed: boolean; remaining: number; resetAt: number }> {
   const now = Date.now();
-  const windowStart = now - (windowSeconds * 1000);
+  const windowStart = now - windowSeconds * 1000;
   const member = `${now}-${randomUUID()}`;
-  
+
   // ★ Lua スクリプトで原子的に実行（競合状態を防止）
-  const result = await redis.eval(
+  const result = (await redis.eval(
     RATE_LIMIT_SCRIPT,
-    1,           // KEYS の数
-    key,         // KEYS[1]
-    now,         // ARGV[1]
+    1, // KEYS の数
+    key, // KEYS[1]
+    now, // ARGV[1]
     windowStart, // ARGV[2]
-    limit,       // ARGV[3]
+    limit, // ARGV[3]
     windowSeconds, // ARGV[4]
-    member       // ARGV[5]
-  ) as [number, number, number];
-  
+    member, // ARGV[5]
+  )) as [number, number, number];
+
   const [allowed, remaining, resetAt] = result;
   return { allowed: allowed === 1, remaining, resetAt };
 }
@@ -346,22 +346,22 @@ async function checkRateLimit(
 ```typescript
 // Fixed Window（シンプル版）- 未認証エンドポイント向け
 async function checkRateLimitFixedWindow(
-  key: string,  // 例: 'ratelimit:ip:{ip}:auth'
+  key: string, // 例: 'ratelimit:ip:{ip}:auth'
   limit: number,
-  windowSeconds: number
+  windowSeconds: number,
 ): Promise<{ allowed: boolean; remaining: number; resetAt: number }> {
   const now = Date.now();
   const windowKey = `${key}:${Math.floor(now / (windowSeconds * 1000))}`;
-  
+
   // INCR は原子的なのでレースコンディションなし
   const count = await redis.incr(windowKey);
   if (count === 1) {
     await redis.expire(windowKey, windowSeconds);
   }
-  
+
   const allowed = count <= limit;
   const resetAt = (Math.floor(now / (windowSeconds * 1000)) + 1) * windowSeconds * 1000;
-  
+
   return { allowed, remaining: Math.max(0, limit - count), resetAt };
 }
 ```
@@ -393,6 +393,7 @@ GET /api/guilds
 **認可**: 要ログイン
 
 **Response**:
+
 ```json
 {
   "guilds": [
@@ -408,6 +409,7 @@ GET /api/guilds
 ```
 
 **`botJoined` の判定方法**:
+
 - Dashboard は Bot トークンを持たない（セキュリティ上の理由）
 - **Redis の `app:guild:{guildId}:joined` キーの存在で判定**（TTL なし）
 - Bot が `guildCreate` イベントでキーを作成、`guildDelete` イベントで削除
@@ -421,10 +423,12 @@ GET /api/guilds/{guildId}/config
 **認可**: 要ログイン + `MANAGE_GUILD` 権限
 
 **Response Headers**:
+
 - `ETag: "3"` (現在の version)
 - `Cache-Control: no-store`
 
 **Response Body**:
+
 ```json
 {
   "guildId": "123456789",
@@ -452,10 +456,12 @@ PUT /api/guilds/{guildId}/config
 **認可**: 要ログイン + `MANAGE_GUILD` 権限
 
 **Headers**:
+
 - `X-CSRF-Token: {csrfToken}` (必須)
 - `If-Match: "{version}"` (楽観的ロック)
 
 **Request Body**:
+
 ```json
 {
   "allowAllChannels": false,
@@ -468,16 +474,16 @@ PUT /api/guilds/{guildId}/config
 ```typescript
 function parseIfMatch(header: string | null): number | null {
   if (!header) return null;
-  
+
   // 厳密に `"${number}"` 形式のみ許可
   const match = header.match(/^"(\d+)"$/);
   if (!match) {
     throw new BadRequestError({
-      code: 'INVALID_IF_MATCH',
+      code: "INVALID_IF_MATCH",
       message: 'If-Match ヘッダーは "version" 形式（例: "3"）で指定してください',
     });
   }
-  
+
   return parseInt(match[1], 10);
 }
 ```
@@ -500,7 +506,7 @@ DELETE FROM channel_whitelist WHERE guild_id = ?;
 INSERT INTO channel_whitelist (guild_id, channel_id) VALUES (?, ?), ...;
 
 -- 5. guild_configs を更新（★ P0対応: WHERE に version を含めて競合検出）
-UPDATE guild_configs 
+UPDATE guild_configs
 SET allow_all_channels = ?, version = version + 1, updated_at = ?
 WHERE guild_id = ? AND version = ?;
 -- ↑ affected rows が 0 なら 409 CONFLICT を返す
@@ -522,16 +528,16 @@ const result = await tx
   .where(
     and(
       eq(guildConfigs.guildId, guildId),
-      eq(guildConfigs.version, expectedVersion) // ★ P0対応: version を WHERE に含める
-    )
+      eq(guildConfigs.version, expectedVersion), // ★ P0対応: version を WHERE に含める
+    ),
   );
 
 // affected rows で競合検出
 if (result.changes === 0) {
   // version が一致しなかった = 競合発生
   throw new ConflictError({
-    code: 'CONFLICT',
-    message: '設定が他のユーザーによって更新されました。再読み込みしてください。',
+    code: "CONFLICT",
+    message: "設定が他のユーザーによって更新されました。再読み込みしてください。",
   }); // 409
 }
 ```
@@ -543,16 +549,19 @@ if (result.changes === 0) {
 async function updateRedisWithRetry(
   guildId: string,
   config: RedisConfig,
-  maxRetries: number = 3
+  maxRetries: number = 3,
 ): Promise<void> {
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
       // ★ TTL なしで永続保存
       await redis.set(`app:guild:${guildId}:config`, JSON.stringify(config));
-      await redis.publish('app:config:update', JSON.stringify({ 
-        guildId, 
-        version: config.version 
-      }));
+      await redis.publish(
+        "app:config:update",
+        JSON.stringify({
+          guildId,
+          version: config.version,
+        }),
+      );
       return; // 成功
     } catch (err) {
       console.error(`[Redis] Update failed (attempt ${attempt}/${maxRetries}):`, err);
@@ -560,7 +569,7 @@ async function updateRedisWithRetry(
         throw err; // リトライ上限に達した
       }
       // 指数バックオフでリトライ（100ms, 200ms, 400ms）
-      await new Promise(resolve => setTimeout(resolve, 100 * Math.pow(2, attempt - 1)));
+      await new Promise((resolve) => setTimeout(resolve, 100 * Math.pow(2, attempt - 1)));
     }
   }
 }
@@ -573,7 +582,7 @@ try {
   await db.transaction(async (tx) => {
     // SQLite トランザクション...
   });
-  
+
   // ★ SQLite 成功後、Redis 更新（ここが失敗したら API 全体を失敗扱い）
   await updateRedisWithRetry(guildId, {
     guildId,
@@ -582,25 +591,28 @@ try {
     version: newVersion,
     updatedAt: new Date().toISOString(),
   });
-  
+
   return { success: true, version: newVersion };
 } catch (err) {
-  if (err instanceof RedisError || err.message?.includes('Redis')) {
+  if (err instanceof RedisError || err.message?.includes("Redis")) {
     // Redis 障害時は 503 Service Unavailable
     // ★ P0対応: 「保存自体は完了した可能性」と現在 version を返す
     const currentConfig = await db.query.guildConfigs.findFirst({
-      where: eq(guildConfigs.guildId, guildId)
+      where: eq(guildConfigs.guildId, guildId),
     });
-    
-    return new Response(JSON.stringify({
-      error: {
-        code: 'SERVICE_UNAVAILABLE',
-        message: '設定の同期に失敗しました。保存は完了している可能性があります。',
-        // ★ P0対応: 現在の version を返すことで、再試行時の 409 を防止
-        currentVersion: currentConfig?.version ?? null,
-        hint: 'ページを再読み込みして、現在の設定を確認してください。'
-      }
-    }), { status: 503 });
+
+    return new Response(
+      JSON.stringify({
+        error: {
+          code: "SERVICE_UNAVAILABLE",
+          message: "設定の同期に失敗しました。保存は完了している可能性があります。",
+          // ★ P0対応: 現在の version を返すことで、再試行時の 409 を防止
+          currentVersion: currentConfig?.version ?? null,
+          hint: "ページを再読み込みして、現在の設定を確認してください。",
+        },
+      }),
+      { status: 503 },
+    );
   }
   throw err;
 }
@@ -618,9 +630,11 @@ async function handleSaveError(response: Response, guildId: string) {
     setVersion(latestConfig.version);
     setWhitelist(new Set(latestConfig.whitelist));
     setAllowAll(latestConfig.allowAllChannels);
-    
+
     // ユーザーに通知（★ 結果整合モデルに対応した文言）
-    setError('保存は完了している可能性があります。最新の状態を表示しました。再読み込みして確認してください。');
+    setError(
+      "保存は完了している可能性があります。最新の状態を表示しました。再読み込みして確認してください。",
+    );
   }
 }
 ```
@@ -640,7 +654,7 @@ POST /api/guilds/{guildId}/channels/refresh
 ```typescript
 // Dashboard 側: 再取得リクエスト
 async function requestChannelRefresh(guildId: string): Promise<void> {
-  await redis.setex(`app:guild:${guildId}:channels:refresh`, 60, '1');
+  await redis.setex(`app:guild:${guildId}:channels:refresh`, 60, "1");
 }
 ```
 
