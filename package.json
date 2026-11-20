@@ -37,7 +37,7 @@
     "winston": "^3.19.0"
   },
   "devDependencies": {
-    "@types/better-sqlite3": "7.6.13",
+    "@types/better-sqlite3": "9.6.0",
     "@vitest/coverage-v8": "4.1.12",
     "drizzle-kit": "0.31.11",
     "oxfmt": "0.79.0",
